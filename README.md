@@ -2,14 +2,10 @@
 
 *Descrição concisa do projeto*
 
----
-
 ## Autores
 
 - **Autor 1** - Pedro Henrique Honorio Saito
 - **Autor 2** - Halison
-
----
 
 ## ⚙️ Pré-requisitos
 
@@ -18,13 +14,19 @@ Antes de compilar o projeto, certifique-se de que os seguintes programas estão 
 - **Compilador C** (por exemplo, `gcc`, `clang`)
 - Quaisquer **bibliotecas** ou dependências necessárias (liste-as, se aplicável)
 
----
-
 ## 🛠️ Instruções de Compilação
 
-Para compilar o projeto, execute o seguinte comando:
+Para compilar o projeto, utilize o compilador de sua preferência (por exemplo, gcc ou clang):
 
 ```bash
 gcc -o main main.c
+clang -o main main.c
 ```
+
+Após a compilação, execute o programa gerado com o comando:
+
+```bash
+./main
+```
+
 
