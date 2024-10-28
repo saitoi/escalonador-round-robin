@@ -4,8 +4,8 @@
 
 ## Autores
 
-- **Autor 1** - Pedro Henrique Honorio Saito
-- **Autor 2** - Halison
+- Pedro Henrique Honorio Saito
+- Halison
 
 ## ⚙️ Pré-requisitos
 
