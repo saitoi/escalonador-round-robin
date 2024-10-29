@@ -2,7 +2,7 @@
 #include <stdlib.h>
 
 #include "../include/processo.h"
-#include "auxiliar.c"
+#include "../include/auxiliar.h"
 
 #define TEMPO_MIN_CPU 5     /* Tempo minimo de CPU */
 #define TEMPO_MAX_CPU 10    /* Tempo maximo de CPU */
@@ -11,7 +11,7 @@
 #define TEMPO_MAX_CHEGADA 4 /* Tempo maximo de inicio */
 
 Processo *aloca_processo(void) {
-    processo = (Processo *) malloc(sizeof(Processo));
+    Processo *processo = (Processo *) malloc(sizeof(Processo));
     
     if (processo == NULL) {
         tratar_erro_alocacao("Erro na alocação de processo.\n");
@@ -22,9 +22,9 @@ Processo *aloca_processo(void) {
 }
 
 Processo *aloca_multiplos_processos(int num_processos) {
-    processos = (Processo *) calloc(num_processos, sizeof(Processo))
+    Processo *processos = (Processo *) calloc(num_processos, sizeof(Processo));
 
-    if (processo == NULL) {
+    if (processos == NULL) {
         tratar_erro_alocacao("Erro na alocação de múltiplos processos.\n");
         return NULL;
     }
@@ -32,13 +32,20 @@ Processo *aloca_multiplos_processos(int num_processos) {
     return processos;
 }
 
-OperacaoES *aloca_operacoes_io(int num_operacoes_io) {
-    OperacaoES *operacoes_io = NULL;
-    controla_erro_alocacao(operacoes_io = (OperacaoES *) calloc(num_operacoes_io, sizeof(OperacaoES)));
+OperacaoIO *aloca_operacoes_io(int num_operacoes_io) {
+    OperacaoIO *operacoes_io = NULL;
+
+    operacoes_io = (OperacaoIO *) calloc(num_operacoes_io, sizeof(OperacaoIO));
+
+    if (operacoes_io == NULL) {
+        tratar_erro_alocacao("Erro na alocação de operação de IO");
+        return NULL;
+    }
+
     return operacoes_io;
 }
 
-int seleciona_tempo_io(TipoES tipo_io) {
+int seleciona_tempo_io(TipoIO tipo_io) {
     switch (tipo_io) {
         case DISCO:
             return TEMPO_DISCO;
@@ -51,7 +58,7 @@ int seleciona_tempo_io(TipoES tipo_io) {
     }
 }
 
-const char *seleciona_tipo_io(TipoES tipo_io) {
+const char *seleciona_tipo_io(TipoIO tipo_io) {
     switch (tipo_io) {
         case DISCO:
             return "Disco";
@@ -87,8 +94,8 @@ Processo *cria_processo(int pid) {
     int i = 0;
 
     processo->pid = pid;
-    processo->instante_chegada = rand() % (TEMPO_MAXIMO_CHEGADA + 1);
-    processo->tempo_cpu = rand() % (TEMPO_MAXIMO_CPU - TEMPO_MINIMO_CPU + 1) + TEMPO_MINIMO_CPU;
+    processo->instante_chegada = rand() % (TEMPO_MAX_CHEGADA + 1);
+    processo->tempo_cpu = rand() % (TEMPO_MAX_CPU - TEMPO_MIN_CPU + 1) + TEMPO_MIN_CPU;
     processo->tempo_cpu_restante = processo->tempo_cpu;
     processo->tempo_quantum_restante = 0;
     processo->tempo_cpu_atual = 0;
@@ -121,47 +128,47 @@ Processo *configurar_processo_usuario(void) {
 
     valida_entrada_inteiro(
         "1. Instante de chegada (0 - 4)",
-        &(processo->instante_chegada),
+        (int *)&(processo->instante_chegada),
         TEMPO_MIN_CHEGADA,
         TEMPO_MAX_CHEGADA
-    )
+    );
 
     valida_entrada_inteiro(
         "2. Tempo de CPU (5 - 10)",
-        &(processo->tempo_cpu),
+        (int *)&(processo->tempo_cpu),
         TEMPO_MIN_CPU,
         TEMPO_MAX_CPU
-    )
+    );
 
     valida_entrada_inteiro(
         "2. Escolha a quantidade de operações de I/O (0 - )",
-        &(processo->num_operacoes_io),
+        (int *)&(processo->num_operacoes_io),
         0,
         QUANTIDADE_TIPOS_IO
-    )
+    );
 
     if (processo->num_operacoes_io == 0)
         return processo;
 
     processo->operacao_io_atual = 0;
-    processo->operacao_io = aloca_operacoes_io(processo->num_operacoes_io);
+    processo->operacoes_io = aloca_operacoes_io(processo->num_operacoes_io);
 
     for (i = 0; i < processo->num_operacoes_io; ++i) {
         valida_entrada_inteiro(
             "2.1. Escolha o tipo de operação de I/O (0: DISCO, 1: FITA, 3: IMPRESSORA)",
-            &(processo->operacoes_io[i].tipo_io),
+            (int *)&(processo->operacoes_io[i].tipo_io),
             0,
             QUANTIDADE_TIPOS_IO
-        )
+        );
 
-        processo->duracao_io = seleciona_tempo_io(processo->operacoes_io[i].tipo_io);
+        processo->operacoes_io[i].duracao_io = seleciona_tempo_io(processo->operacoes_io[i].tipo_io);
 
         valida_entrada_inteiro(
             "2.2. Escolha o instante de início da operação de I/O (0 - 4)",
-            &(processo->operacoes_io[i].tempo_inicio),
+            (int *)&(processo->operacoes_io[i].tempo_inicio),
             0,
             QUANTIDADE_TIPOS_IO + 1
-        )
+        );
 
         processo->operacoes_io[i].tempo_restante = processo->operacoes_io[i].duracao_io;
     }
@@ -173,7 +180,7 @@ Processo *configurar_processo_usuario(void) {
 }
 
 Processo *inicializa_processos(int qtd_processos) {
-    Processo *processos = aloca_processos(qtd_processos);
+    Processo *processos = aloca_multiplos_processos(qtd_processos);
     int i = 0;
 
     for (i = 0; i < qtd_processos; i++)
@@ -198,7 +205,7 @@ int processo_finalizado(Processo *processo) {
     return 0;
 }
 
-int tempo_inicio_es(Processo *processo) {
+int tempo_inicio_io(Processo *processo) {
     if (processo->operacoes_io != NULL) {
         if (processo->tempo_cpu_atual == processo->operacoes_io[processo->operacao_io_atual].tempo_inicio)
             return 1;
@@ -208,7 +215,7 @@ int tempo_inicio_es(Processo *processo) {
     return 0;
 }
 
-void executa_es(Processo *processo) {
+void executa_io(Processo *processo) {
     if (processo->status_processo == EXECUTANDO)
         processo->status_processo = ENTRADA_SAIDA;
     else {
@@ -220,7 +227,7 @@ void executa_es(Processo *processo) {
     }
 }
 
-int es_finalizada(Processo *processo) {
+int io_finalizada(Processo *processo) {
     if (processo->operacoes_io[processo->operacao_io_atual].tempo_restante == 0) {
         printf("O processo P%d finalizou sua E/S de %s,", processo->pid,
             seleciona_tipo_io(processo->operacoes_io[processo->operacao_io_atual].tipo_io));

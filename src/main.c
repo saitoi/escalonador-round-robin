@@ -2,10 +2,11 @@
 #include <stdlib.h>
 #include <time.h>
 
-#include "processo.c"
-#include "fila.c"
-#include "escalonador.c"
-#include "interface.c"
+#include "../include/processo.h"
+#include "../include/fila.h"
+#include "../include/escalonador.h"
+#include "../include/interface.h"
+#include "../include/auxiliar.h"
 
 int main(void) {
     Processo *processos = inicializa_processos(MAXIMO_PROCESSOS);

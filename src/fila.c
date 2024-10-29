@@ -2,10 +2,18 @@
 #include <stdlib.h>
 
 #include "../include/fila.h"
+#include "../include/auxiliar.h"
 
 Fila *aloca_fila(void) {
     Fila *fila = NULL;
-    controla_erro_alocacao((fila = (Fila *) malloc(sizeof(Fila))));
+
+    fila = (Fila *) malloc(sizeof(Fila));
+
+    if (fila == NULL) {
+        tratar_erro_alocacao("Erro na alocação da fila.\n");
+        return NULL;
+    }
+
     return fila;
 }
 
@@ -24,12 +32,11 @@ int fila_vazia(Fila *fila) {
 No *aloca_no(void) {
     No *no = (No *) malloc(sizeof(No));
 
-    if (s == NULL) {
+    if (no == NULL) {
         tratar_erro_alocacao("Falha ao alocar struct.\n");
         return NULL;
     }
 
-    controla_erro_alocacao((no = (No *) malloc(sizeof(No))));
     return no;
 }
 
@@ -92,31 +99,31 @@ void esvazia_fila(Fila *fila) {
     }
 }
 
-void imprime_fila(Fila *fila) {
-    No *atual = fila->inicio;
+// void imprime_fila(Fila *fila) {
+//     No *atual = fila->inicio;
 
-    if (fila_vazia(fila)) {
-        printf("\n");
-        return;
-    }
+//     if (fila_vazia(fila)) {
+//         printf("\n");
+//         return;
+//     }
 
-    while (atual != NULL) {
-        printf("P%d ", atual->processo.pid);
-        atual = atual->prox;
-    }
-    printf("\n");
-}
+//     while (atual != NULL) {
+//         printf("P%d ", atual->processo.pid);
+//         atual = atual->prox;
+//     }
+//     printf("\n");
+// }
 
-void imprime_fila_formatada(const char *nome_fila, Fila *fila) {
-    printf("%s: ", nome_fila);
-    imprime_fila(fila);
-}
-
-void imprime_filas(Fila *fila_alta_prioridade, Fila *fila_baixa_prioridade, Fila *fila_disco, Fila *fila_fita, Fila *fila_impressora) {
-    printf("\n");
-    imprime_fila_formatada("Fila de alta prioridade", fila_alta_prioridade);
-    imprime_fila_formatada("Fila de baixa prioridade", fila_baixa_prioridade);
-    imprime_fila_formatada("Fila de disco", fila_disco);
-    imprime_fila_formatada("Fila de fita", fila_fita);
-    imprime_fila_formatada("Fila de impressora", fila_impressora);
-}
+/*void imprime_fila_formatada(const char *nome_fila, Fila *fila) {*/
+/*    printf("%s: ", nome_fila);*/
+/*    imprime_fila(fila);*/
+/*}*/
+/**/
+/*void imprime_filas(Fila *fila_alta_prioridade, Fila *fila_baixa_prioridade, Fila *fila_disco, Fila *fila_fita, Fila *fila_impressora) {*/
+/*    printf("\n");*/
+/*    imprime_fila_formatada("Fila de alta prioridade", fila_alta_prioridade);*/
+/*    imprime_fila_formatada("Fila de baixa prioridade", fila_baixa_prioridade);*/
+/*    imprime_fila_formatada("Fila de disco", fila_disco);*/
+/*    imprime_fila_formatada("Fila de fita", fila_fita);*/
+/*    imprime_fila_formatada("Fila de impressora", fila_impressora);*/
+/*}*/

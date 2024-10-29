@@ -7,19 +7,19 @@
 #define QUANTIDADE_TIPOS_IO 3   /* Quantidade de tipos de E/S */
 
 /* Enumeracao contendo os tipos de E/S */
-typedef enum _TipoES {
+typedef enum _TipoIO {
     DISCO,
     FITA,
     IMPRESSORA
-} TipoES;
+} TipoIO;
 
 /* Estrutura para armazenar as operacoes de E/S */
-typedef struct _OperacaoES {
-    TipoES tipo_es;     /* Tipo de E/S */
-    int duracao_es;     /* Tempo de duracao da operacao de E/S */
+typedef struct _OperacaoIO {
+    TipoIO tipo_io;     /* Tipo de E/S */
+    int duracao_io;     /* Tempo de duracao da operacao de E/S */
     int tempo_inicio;   /* Tempo de inicio da operacao de E/S */
     int tempo_restante; /* Tempo restante para finalizar a operacao de E/S */
-} OperacaoES;
+} OperacaoIO;
 
 /* Enumeracao contendo os status do processo */
 typedef enum _StatusProcesso {
@@ -31,7 +31,7 @@ typedef enum _StatusProcesso {
 /* Estrutura para armazenar os processos */
 typedef struct _Processo {
     int pid; /* Identificador do processo */
-    int tempo_inicio; /* Tempo de inicio do processo */
+    int instante_chegada; /* Tempo de inicio do processo */
     int tempo_cpu; /* Tempo de CPU do processo */
     int tempo_fim; /* Tempo de fim do processo */
     int tempo_turnaround; /* Tempo de turnaround do processo */
@@ -39,9 +39,9 @@ typedef struct _Processo {
     int tempo_cpu_restante; /* Tempo de CPU restante do processo */
     int tempo_cpu_atual; /* Tempo de CPU atual do processo */
 
-    OperacaoES *operacoes_es; /* Vetor de operacoes de E/S */
-    int num_operacoes_es; /* Quantidade de operacoes de E/S */
-    int operacao_es_atual; /* Indice da operacao de E/S atual */
+    OperacaoIO *operacoes_io; /* Vetor de operacoes de E/S */
+    int num_operacoes_io; /* Quantidade de operacoes de E/S */
+    int operacao_io_atual; /* Indice da operacao de E/S atual */
     StatusProcesso status_processo; /* Status do processo */
 } Processo;
 
@@ -53,22 +53,22 @@ Processo *aloca_processo(void);
 /* Funcao para alocar o espaco de um vetor de processos */
 /* Recebe a quantidade de processos a serem alocados */
 /* Retorna um ponteiro para o vetor de processos alocado */
-Processo *aloca_processos(int num_processos);
+Processo *aloca_multiplos_processos(int num_processos);
 
 /* Funcao para alocar o espaco de um vetor de operacoes de E/S */
 /* Recebe a quantidade de operacoes de E/S a serem alocadas */
 /* Retorna um ponteiro para o vetor de operacoes de E/S alocado */
-OperacaoES *aloca_operacoes_es(int num_operacoes_es);
+OperacaoIO *aloca_operacoes_io(int num_operacoes_io);
 
 /* Funcao para selecionar o tempo de uma operacao de E/S */
 /* Recebe o tipo de E/S */
 /* Retorna o tempo da operacao de E/S */
-int seleciona_tempo_es(TipoES tipo_es);
+int seleciona_tempo_io(TipoIO tipo_io);
 
 /* Funcao para selecionar o tipo de uma operacao de E/S */
 /* Recebe o tipo de E/S */
 /* Retorna uma string contendo o tipo de E/S */
-const char *seleciona_tipo_es(TipoES tipo_es);
+const char *seleciona_tipo_io(TipoIO tipo_io);
 
 /* Funcao para selecionar o status de um processo */
 /* Recebe o status do processo */
@@ -85,6 +85,8 @@ Processo *cria_processo(int pid);
 /* Retorna um ponteiro para o vetor de processos inicializados */
 Processo *inicializa_processos(int qtd_processos);
 
+Processo *configurar_processo_usuario(void);
+
 /* Funcao para executar um processo */
 /* Recebe o processo a ser executado */
 /* Nao retorna valores */
@@ -98,17 +100,17 @@ int processo_finalizado(Processo *processo);
 /* Funcao para verificar se um processo deve iniciar uma operacao de E/S */
 /* Recebe o processo a ser verificado */
 /* Retorna 1 caso o processo deva iniciar uma operacao de E/S, 0 caso contrario */
-int tempo_inicio_es(Processo *processo);
+int tempo_inicio_io(Processo *processo);
 
 /* Funcao para executar uma operacao de E/S */
 /* Recebe o processo a ser verificado */
 /* Nao retorna valores */
-void executa_es(Processo *processo);
+void executa_io(Processo *processo);
 
 /* Funcao para verificar se uma operacao de E/S finalizou sua execucao */
 /* Recebe o processo a ser verificado */
 /* Retorna 1 caso a operacao de E/S tenha finalizado, 0 caso contrario */
-int es_finalizada(Processo *processo);
+int io_finalizada(Processo *processo);
 
 /* Funcao para verificar se um processo atingiu o tempo de quantum */
 /* Recebe o processo a ser verificado e o tempo de quantum */
