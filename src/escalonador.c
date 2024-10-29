@@ -20,7 +20,10 @@ void escalonador(Processo *processos, Fila *fila_alta_prioridade, Fila *fila_bai
     imprime_informacao_processos(processos);
 
     while (num_processos_finalizados < MAXIMO_PROCESSOS) {
-        printf("\n=========== INSTANTE %d ===========\n\n", tempo_atual);
+        // TODO: Transformar em funções da interface
+        printf("\n╔═════════════════════════════════════╗\n");
+        printf("║          >>> INSTANTE %d <<<        ║\n", tempo_atual);
+        printf("╠═════════════════════════════════════╣\n");
 
         verifica_novos_processos(processos, tempo_atual, fila_alta_prioridade);
 

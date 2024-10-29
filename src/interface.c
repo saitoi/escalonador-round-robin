@@ -8,71 +8,72 @@
 #include "../include/interface.h"
 
 void imprime_menu(void) {
-    printf("==============================================\n");
-    printf("      SIMULADOR ROUND ROBIN COM FEEDBACK       \n");
-    printf("==============================================\n");
-    printf("1. Criar um processo.\n");
-    printf("2. Executar o escalonador.\n");
-    printf("3. Sair\n");
-    printf("==============================================\n");
+    printf("╔════════════════════════════════════════════╗\n");
+    printf("║     SIMULADOR ROUND ROBIN COM FEEDBACK     ║\n");
+    printf("╚════════════════════════════════════════════╝\n");
+    printf("║ 1. Criar um processo.                      ║\n");
+    printf("║ 2. Executar o escalonador.                 ║\n");
+    printf("║ 3. Sair                                    ║\n");
+    printf("╚════════════════════════════════════════════╝\n");
 }
 
 // TODO: Reduzir parâmetros dessa função
-void processa_menu(Processo *processos, Fila *fila_alta_prioridade, Fila *fila_baixa_prioridade, Fila *fila_disco, Fila *fila_fita, Fila *fila_impressora) {
+void processa_menu(Processo *processos, Fila *fila_alta_prioridade, Fila *fila_baixa_prioridade, Fila *fila_disco, Fila *fila_fita, Fila *fila_impressora)
+{
     int opcao;
     int contador_processos = 0;
 
-    do {
-        imprime_menu();
+    imprime_menu();
 
-        valida_entrada_inteiro(
-            "Escolha uma opção",
-            &opcao,
-            1,
-            3
-        );
+    valida_entrada_inteiro(
+        "Escolha uma opção",
+        &opcao,
+        1,
+        3);
 
-        switch(opcao) {
-            case 1: {
-                if (contador_processos < MAXIMO_PROCESSOS) {
-                    Processo *novo_processo_usuario = configurar_processo_usuario();
-                    processos[contador_processos] = *novo_processo_usuario;
-                    contador_processos++;
-                    free(novo_processo_usuario); // Libera a memória alocada
-                } else {
-                    printf("Número máximo de processos alcançado.\n");
-                }
-                break;
-            }
-            case 2:
-                escalonador(processos,
-                            fila_alta_prioridade,
-                            fila_baixa_prioridade,
-                            fila_disco,
-                            fila_fita,
-                            fila_impressora);
-                break;
-            case 3:
-                printf("Encerrando o simulador. Até logo!\n");
-                break;
-            default:
-                printf("Opção inválida. Tente novamente.\n\n");
+    switch (opcao) {
+    case 1: {
+        if (contador_processos < MAXIMO_PROCESSOS) {
+            Processo *novo_processo_usuario = configurar_processo_usuario();
+            processos[contador_processos] = *novo_processo_usuario;
+            contador_processos++;
+            free(novo_processo_usuario); // Libera a memória alocada
         }
-    } while(opcao != 3);
+        else {
+            printf("Número máximo de processos alcançado.\n");
+        }
+        break;
+    }
+    case 2:
+        escalonador(processos,
+                    fila_alta_prioridade,
+                    fila_baixa_prioridade,
+                    fila_disco,
+                    fila_fita,
+                    fila_impressora);
+        break;
+    case 3:
+        printf("Encerrando o simulador. Até logo!\n");
+        break;
+    default:
+        printf("Opção inválida. Tente em outra vez.\n\n");
+    }
 }
 
 void imprime_todas_filas(Fila *fila_alta_prioridade, Fila *fila_baixa_prioridade, Fila *fila_disco, Fila *fila_fita, Fila *fila_impressora) {
     printf("\n");
-    imprime_fila("Fila de alta prioridade", fila_alta_prioridade);
-    imprime_fila("Fila de baixa prioridade", fila_baixa_prioridade);
-    imprime_fila("Fila de disco", fila_disco);
-    imprime_fila("Fila de fita", fila_fita);
-    imprime_fila("Fila de impressora", fila_impressora);
+    imprime_fila("  Alta Prioridade", fila_alta_prioridade);
+    imprime_fila("  Baixa Prioridade", fila_baixa_prioridade);
+    imprime_fila("  Disco", fila_disco);
+    imprime_fila("️  Fita", fila_fita);
+    imprime_fila("️  Impressora", fila_impressora);
 }
 
 void imprime_fila(const char *nome_fila, Fila *fila) {
     if (fila == NULL || fila_vazia(fila)) {
-        printf("%s está vazia.\n", nome_fila);
+        printf("╔═════════════════════════════════════╗\n");
+        printf("║  %s: Vazia                          ║\n", nome_fila);
+        printf("╚═════════════════════════════════════╝\n");
         return;
     }
 
@@ -83,21 +84,34 @@ void imprime_fila(const char *nome_fila, Fila *fila) {
         current = current->prox;
     }
 
-    printf("%s: \n\n", nome_fila);
-    for (int i = 0; i < count; i++) {
-        printf("+---");
+    // Cabeçalho da fila
+    printf("╔═════════════════════════════════════╗\n");
+    printf("║  %s:                                ║\n", nome_fila);
+    printf("╠═════════════════════════════════════╣\n");
+    
+    // Parte superior da caixa
+    printf("║  ┌─────────");
+    for (int i = 1; i < count; i++) {
+        printf("┬─────────");
     }
-    printf("+\n");
+    printf("┐  ║\n");
 
+    // Impressão dos processos
     current = fila->inicio;
+    printf("║  │   P%d    ", current->processo.pid);
+    current = current->prox;
     while (current != NULL) {
-        printf("| %d ", current->processo.pid);
+        printf("│   P%d    ", current->processo.pid);
         current = current->prox;
     }
-    printf("|\n");
+    printf("│  ║\n");
 
-    for (int i = 0; i < count; i++) {
-        printf("+---");
+    // Parte inferior da caixa
+    printf("║  └─────────");
+    for (int i = 1; i < count; i++) {
+        printf("┴─────────");
     }
-    printf("+\n");
+    printf("┘  ║\n");
+
+    printf("╚═════════════════════════════════════╝\n");
 }
