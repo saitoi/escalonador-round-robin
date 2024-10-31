@@ -62,11 +62,11 @@ void processa_menu(Processo *processos, Fila *fila_alta_prioridade, Fila *fila_b
 
 void imprime_todas_filas(Fila *fila_alta_prioridade, Fila *fila_baixa_prioridade, Fila *fila_disco, Fila *fila_fita, Fila *fila_impressora) {
     printf("\n");
-    imprime_fila("  Alta Prioridade", fila_alta_prioridade);
-    imprime_fila("  Baixa Prioridade", fila_baixa_prioridade);
-    imprime_fila("  Disco", fila_disco);
-    imprime_fila("️  Fita", fila_fita);
-    imprime_fila("️  Impressora", fila_impressora);
+    imprime_fila("  Alta Prioridade  ", fila_alta_prioridade);
+    imprime_fila("  Baixa Prioridade ", fila_baixa_prioridade);
+    imprime_fila("       Disco       ", fila_disco);
+    imprime_fila("️       Fita        ", fila_fita);
+    imprime_fila("️    Impressora     ", fila_impressora);
 }
 
 void imprime_fila(const char *nome_fila, Fila *fila) {
@@ -84,19 +84,17 @@ void imprime_fila(const char *nome_fila, Fila *fila) {
         current = current->prox;
     }
 
-    // Cabeçalho da fila
     printf("╔═════════════════════════════════════╗\n");
     printf("║  %s:                                ║\n", nome_fila);
     printf("╠═════════════════════════════════════╣\n");
     
-    // Parte superior da caixa
+    // Imprime os elementos da fila em estilo gráfico
     printf("║  ┌─────────");
     for (int i = 1; i < count; i++) {
         printf("┬─────────");
     }
-    printf("┐  ║\n");
+    printf("┐     ║\n");
 
-    // Impressão dos processos
     current = fila->inicio;
     printf("║  │   P%d    ", current->processo.pid);
     current = current->prox;
@@ -104,14 +102,13 @@ void imprime_fila(const char *nome_fila, Fila *fila) {
         printf("│   P%d    ", current->processo.pid);
         current = current->prox;
     }
-    printf("│  ║\n");
+    printf("│     ║\n");
 
-    // Parte inferior da caixa
     printf("║  └─────────");
     for (int i = 1; i < count; i++) {
         printf("┴─────────");
     }
-    printf("┘  ║\n");
+    printf("┘     ║\n");
 
     printf("╚═════════════════════════════════════╝\n");
 }
