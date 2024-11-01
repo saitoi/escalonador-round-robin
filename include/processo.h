@@ -3,14 +3,12 @@
 
 #define TEMPO_DISCO 2           /* Tempo de execucao de disco */
 #define TEMPO_FITA 3            /* Tempo de execucao de fita */
-#define TEMPO_IMPRESSORA 4      /* Tempo de execucao de impressora */
-#define QUANTIDADE_TIPOS_IO 3   /* Quantidade de tipos de E/S */
+#define QUANTIDADE_TIPOS_IO 2   /* Quantidade de tipos de E/S */
 
 /* Enumeracao contendo os tipos de E/S */
 typedef enum _TipoIO {
     DISCO,
-    FITA,
-    IMPRESSORA
+    FITA
 } TipoIO;
 
 /* Estrutura para armazenar as operacoes de E/S */
@@ -30,18 +28,18 @@ typedef enum _StatusProcesso {
 
 /* Estrutura para armazenar os processos */
 typedef struct _Processo {
-    int pid; /* Identificador do processo */
-    int instante_chegada; /* Tempo de inicio do processo */
-    int tempo_cpu; /* Tempo de CPU do processo */
-    int tempo_fim; /* Tempo de fim do processo */
-    int tempo_turnaround; /* Tempo de turnaround do processo */
+    int pid;                    /* Identificador do processo */
+    int instante_chegada;       /* Tempo de inicio do processo */
+    int tempo_cpu;              /* Tempo de CPU do processo */
+    int tempo_fim;              /* Tempo de fim do processo */
+    int tempo_turnaround;       /* Tempo de turnaround do processo */
     int tempo_quantum_restante; /* Tempo de quantum restante do processo */
-    int tempo_cpu_restante; /* Tempo de CPU restante do processo */
-    int tempo_cpu_atual; /* Tempo de CPU atual do processo */
+    int tempo_cpu_restante;     /* Tempo de CPU restante do processo */
+    int tempo_cpu_atual;        /* Tempo de CPU atual do processo */
 
-    OperacaoIO *operacoes_io; /* Vetor de operacoes de E/S */
-    int num_operacoes_io; /* Quantidade de operacoes de E/S */
-    int operacao_io_atual; /* Indice da operacao de E/S atual */
+    OperacaoIO *operacoes_io;   /* Vetor de operacoes de E/S */
+    int num_operacoes_io;       /* Quantidade de operacoes de E/S */
+    int operacao_io_atual;      /* Indice da operacao de E/S atual */
     StatusProcesso status_processo; /* Status do processo */
 } Processo;
 
@@ -75,16 +73,30 @@ const char *seleciona_tipo_io(TipoIO tipo_io);
 /* Retorna uma string contendo o status do processo */
 const char *seleciona_status_processo(StatusProcesso status_processo);
 
-/* Funcao para criar um processo */
+/* Funcao para criar um processo com seed aleatória */
 /* Recebe o pid do processo */
-/* Retorna um ponteiro para o processo criado */
-Processo *cria_processo(int pid);
+/* Retorna um ponteiro para os processos criados */
+Processo *criar_processos_aleatorios();
+
+
+/* Funcao para criar um processo com seed aleatória */
+/* Recebe o pid do processo */
+/* Retorna um ponteiro para os processos criados */
+Processo *criar_processo_aleatorio(int pid);
+
+
+/* Funcao para criar um processo a partir da leitura do CSV */
+/* Recebe o nome do arquivo para leitura dos dados */
+/* Retorna um ponteiro para os processos criados */
+Processo *criar_processos_csv(const char *nome_arquivo);
+
 
 /* Funcao para inicializar os processos */
 /* Recebe a quantidade de processos a serem inicializados */
 /* Retorna um ponteiro para o vetor de processos inicializados */
-Processo *inicializa_processos(int qtd_processos);
+// Processo *inicializa_processos(int qtd_processos);
 
+// TODO: Remover essa declaracao, função e removê-la do menu
 Processo *configurar_processo_usuario(void);
 
 /* Funcao para executar um processo */
