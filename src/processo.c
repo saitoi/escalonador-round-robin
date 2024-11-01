@@ -83,13 +83,13 @@ const char *seleciona_status_processo(StatusProcesso status_processo) {
 
 Processo *criar_processo_aleatorio(int pid) {
     Processo *processo = aloca_processo();
-    int i = 0;
-
-    /* Definindo a seed com o tempo atual */
-    srand(time(NULL));
+    if (!processo) {
+        tratar_erro_alocacao("Erro ao alocar processo.\n");
+        return NULL;
+    }
 
     processo->pid = pid;
-    processo->instante_chegada = gerar_dado_aleatorio(0, TEMPO_MAX_CHEGADA + 1);
+    processo->instante_chegada = gerar_dado_aleatorio(0, TEMPO_MAX_CHEGADA);
     processo->tempo_cpu = gerar_dado_aleatorio(TEMPO_MIN_CPU, TEMPO_MAX_CPU);
     processo->tempo_cpu_restante = processo->tempo_cpu;
     processo->tempo_quantum_restante = 0;
@@ -97,70 +97,60 @@ Processo *criar_processo_aleatorio(int pid) {
     processo->status_processo = PRONTO;
 
     processo->num_operacoes_io = gerar_dado_aleatorio(0, QUANTIDADE_TIPOS_IO);
-    if (processo->num_operacoes_io == 0)
-        return processo;
+    if (processo->num_operacoes_io > 0) {
+        processo->operacao_io_atual = 0;
+        processo->operacoes_io = aloca_operacoes_io(processo->num_operacoes_io);
+        if (!processo->operacoes_io) {
+            tratar_erro_alocacao("Erro ao alocar operações de IO.\n");
+            free(processo);
+            return NULL;
+        }
 
-    processo->operacao_io_atual = 0;
-    processo->operacoes_io = aloca_operacoes_io(processo->num_operacoes_io);
+        for (int i = 0; i < processo->num_operacoes_io; i++) {
+            processo->operacoes_io[i].tipo_io = gerar_dado_aleatorio(0, QUANTIDADE_TIPOS_IO - 1);
+            processo->operacoes_io[i].duracao_io = seleciona_tempo_io(processo->operacoes_io[i].tipo_io);
+            processo->operacoes_io[i].tempo_inicio = gerar_dado_aleatorio(0, processo->tempo_cpu);
+            processo->operacoes_io[i].tempo_restante = processo->operacoes_io[i].duracao_io;
+        }
 
-    for (i = 0; i < processo->num_operacoes_io; i++) {
-        processo->operacoes_io[i].tipo_io = gerar_dado_aleatorio(0, QUANTIDADE_TIPOS_IO);
-        processo->operacoes_io[i].duracao_io = seleciona_tempo_io(processo->operacoes_io[i].tipo_io);
-        processo->operacoes_io[i].tempo_inicio = gerar_dado_aleatorio(0, QUANTIDADE_TIPOS_IO + 1);
-        processo->operacoes_io[i].tempo_restante = processo->operacoes_io[i].duracao_io;
+        /* Ordena as operações de IO pelo tempo de início */
+        quicksort_operacoes_io(processo->operacoes_io, 0, processo->num_operacoes_io - 1);
     }
-
-    quicksort(processo->operacoes_io, 0, processo->num_operacoes_io - 1);
 
     return processo;
 }
 
-Processo *criar_processo_csv(const char *nome_arquivo_processos, const char *nome_arquivo_io, int *quantidade) {
-    FILE *arquivo_processos = fopen(nome_arquivo_processos, "r");
-    FILE *arquivo_io = fopen(nome_arquivo_io, "r");
-
-    if (!arquivo_processos || !arquivo_io) {
-        tratar_erro_alocacao("Erro ao abrir um ou mais arquivos de entrada.\n");
-        if (arquivo_processos) fclose(arquivo_processos);
-        if (arquivo_io) fclose(arquivo_io);
+Processo *criar_processos_csv(const char *nome_arquivo, int *quantidade) {
+    FILE *arquivo = fopen(nome_arquivo, "r");
+    if (!arquivo) {
+        tratar_erro_alocacao("Erro ao abrir arquivo de entrada.\n");
         return NULL;
     }
 
     Processo *processos = (Processo *) calloc(MAXIMO_PROCESSOS, sizeof(Processo));
-
     if (!processos) {
-        tratar_erro_alocacao("Erro ao alocar múltiplos processos.\n");
+        tratar_erro_alocacao("Erro ao alocar memória para processos.\n");
+        fclose(arquivo);
         return NULL;
     }
 
-    char linha[MAXIMO_PROCESSOS + 1];
-    int i = 0;
+    char linha[MAX_LINHA];
+    int qtd_processos_lidos = 0;
 
     /* Ignora a primeira linha */
-    fgets(linha, MAXIMO_PROCESSOS, arquivo_processos);
-    fgets(linha, MAXIMO_PROCESSOS, arquivo_io);
+    fgets(linha, MAX_LINHA, arquivo);
 
-    // TODO: Função em `auxiliar.c` para validar a entrada do CSV
-    // Lê dados gerais dos processos
-    while (fgets(linha, MAXIMO_PROCESSOS + 1, arquivo_processos) && i < MAXIMO_PROCESSOS + 1) {
-        sscanf(linha, "%d,%d,%d,%d,%d,%d,%d", &processos[i].pid,
-                                              &processos[i].instante_chegada,
-                                              &processos[i].tempo_cpu,
-                                              &processos[i].num_operacoes_io);
-        i++;
-    }
-
-    // Lê dados das operações de entrada e saída para cada processo
-    while (fgets(linha, MAXIMO_PROCESSOS + 1, arquivo_io) && i < MAXIMO_PROCESSOS + 1) {
-        sscanf(linha, "%d,%d,%d,%d,%d,%d,%d", &processos[i].pid,
-                                              &processos[i].instante_chegada,
-                                              &processos[i].tempo_cpu,
-                                              &processos[i].num_operacoes_io);
-        i++;
+    while (fgets(linha, MAX_LINHA, arquivo) && qtd_processos_lidos < MAXIMO_PROCESSOS) {
+        Processo *processo = &processos[qtd_processos_lidos];
+        if (!parse_linha_csv(linha, processo)) {
+            continue; /* Linha inválida, vai para a próxima */
+        }
+        qtd_processos_lidos++;
     }
 
     fclose(arquivo);
 
+    *quantidade = qtd_processos_lidos;
     return processos;
 }
 
@@ -200,7 +190,7 @@ Processo *configurar_processo_usuario(void) {
 
     for (i = 0; i < processo->num_operacoes_io; ++i) {
         valida_entrada_inteiro(
-            "2.1. Escolha o tipo de operação de I/O (0: DISCO, 1: FITA, 3: IMPRESSORA)",
+            "2.1. Escolha o tipo de operação de I/O (0: DISCO, 1: FITA)",
             (int *)&(processo->operacoes_io[i].tipo_io),
             0,
             QUANTIDADE_TIPOS_IO
@@ -230,7 +220,7 @@ Processo *inicializa_processos(int qtd_processos) {
     int i = 0;
 
     for (i = 0; i < qtd_processos; i++)
-        processos[i] = *cria_processo(i);
+        processos[i] = *criar_processo_aleatorio(i);
 
     return processos;
 }
