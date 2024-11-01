@@ -81,6 +81,16 @@ const char *seleciona_status_processo(StatusProcesso status_processo) {
     }
 }
 
+Processo *criar_processos_aleatorios() {
+    Processo *processos = aloca_multiplos_processos(MAXIMO_PROCESSOS);
+    int i = 0;
+
+    for (i = 0; i < MAXIMO_PROCESSOS; i++)
+        processos[i] = *criar_processo_aleatorio(i);
+
+    return processos;
+}
+
 Processo *criar_processo_aleatorio(int pid) {
     Processo *processo = aloca_processo();
     if (!processo) {
@@ -120,7 +130,7 @@ Processo *criar_processo_aleatorio(int pid) {
     return processo;
 }
 
-Processo *criar_processos_csv(const char *nome_arquivo, int *quantidade) {
+Processo *criar_processos_csv(const char *nome_arquivo) {
     FILE *arquivo = fopen(nome_arquivo, "r");
     if (!arquivo) {
         tratar_erro_alocacao("Erro ao abrir arquivo de entrada.\n");
@@ -150,11 +160,10 @@ Processo *criar_processos_csv(const char *nome_arquivo, int *quantidade) {
 
     fclose(arquivo);
 
-    *quantidade = qtd_processos_lidos;
     return processos;
 }
 
-// TODO: Deletar essa função
+// TODO: Remover essa função
 Processo *configurar_processo_usuario(void) {
     Processo *processo = aloca_processo();
     int i = 0;
@@ -215,15 +224,16 @@ Processo *configurar_processo_usuario(void) {
 }
 
 // TODO: Mudar essa função para se adequar
-Processo *inicializa_processos(int qtd_processos) {
-    Processo *processos = aloca_multiplos_processos(qtd_processos);
-    int i = 0;
 
-    for (i = 0; i < qtd_processos; i++)
-        processos[i] = *criar_processo_aleatorio(i);
+// Processo *inicializa_processos(int qtd_processos) {
+//     Processo *processos = aloca_multiplos_processos(qtd_processos);
+//     int i = 0;
 
-    return processos;
-}
+//     for (i = 0; i < qtd_processos; i++)
+//         processos[i] = *criar_processo_aleatorio(i);
+
+//     return processos;
+// }
 
 void executa_processo(Processo *processo) {
     printf("O processo P%d executou por 1 u.t.\n", processo->pid);
