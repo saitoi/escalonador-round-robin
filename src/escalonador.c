@@ -8,7 +8,7 @@
 #include "../include/interface.h"
 
 
-void escalonador(Processo *processos, Fila *fila_alta_prioridade, Fila *fila_baixa_prioridade, Fila *fila_disco, Fila *fila_fita, Fila *fila_impressora) {
+void escalonador(Processo *processos, Fila *fila_alta_prioridade, Fila *fila_baixa_prioridade, Fila *fila_disco, Fila *fila_fita) {
 
     int tempo_atual = 0,
         num_processos_finalizados = 0;
@@ -17,10 +17,11 @@ void escalonador(Processo *processos, Fila *fila_alta_prioridade, Fila *fila_bai
              entrada_saida_atual;
 
     // Chamado uma única vez para imprimir os dados iniciais dos processos
+    // TODO: Transformar em função da interface
     imprime_informacao_processos(processos);
 
     while (num_processos_finalizados < MAXIMO_PROCESSOS) {
-        // TODO: Transformar em funções da interface
+        // TODO: Transformar em função de `interface.c`
         printf("\n╔═════════════════════════════════════╗\n");
         printf("║          >>> INSTANTE %d <<<        ║\n", tempo_atual);
         printf("╠═════════════════════════════════════╣\n");
@@ -37,7 +38,7 @@ void escalonador(Processo *processos, Fila *fila_alta_prioridade, Fila *fila_bai
             }
 
             else if (tempo_inicio_io(&processo_atual))
-                envia_para_io(processo_atual, fila_disco, fila_fita, fila_impressora);
+                envia_para_io(processo_atual, fila_disco, fila_fita);
 
             else if (tempo_quantum_completo(&processo_atual, QUANTUM)) {
                 printf("O processo P%d sofreu preempcao, vai pra fila de baixa prioridade.\n",
@@ -59,7 +60,7 @@ void escalonador(Processo *processos, Fila *fila_alta_prioridade, Fila *fila_bai
             }
 
             else if (tempo_inicio_io(&processo_atual))
-                envia_para_io(processo_atual, fila_disco, fila_fita, fila_impressora);
+                envia_para_io(processo_atual, fila_disco, fila_fita);
 
             else if (tempo_quantum_completo(&processo_atual, QUANTUM)) {
                 printf("O processo P%d sofreu preempcao, vai pra fila de baixa prioridade.\n",
@@ -95,24 +96,26 @@ void escalonador(Processo *processos, Fila *fila_alta_prioridade, Fila *fila_bai
                 enfileira_inicio(fila_fita, entrada_saida_atual);
         }
 
-        if (!fila_vazia(fila_impressora)) {
-            entrada_saida_atual = desenfileira(fila_impressora);
-            executa_io(&entrada_saida_atual);
+        // Remover essa lógica
 
-            if (io_finalizada(&entrada_saida_atual)) {
-                printf(" vai para a fila de alta prioridade.\n");
-                if (!fila_vazia(fila_baixa_prioridade) && processo_atual.pid == fila_baixa_prioridade->inicio->processo.pid) printf("O processo P%d sofreu preempcao, vai pra fila de baixa prioridade.\n",
-                    processo_atual.pid);
-                enfileira(fila_alta_prioridade, entrada_saida_atual);
-            } else
-                enfileira_inicio(fila_impressora, entrada_saida_atual);
-        }
+        // if (!fila_vazia(fila_impressora)) {
+        //     entrada_saida_atual = desenfileira(fila_impressora);
+        //     executa_io(&entrada_saida_atual);
+
+        //     if (io_finalizada(&entrada_saida_atual)) {
+        //         printf(" vai para a fila de alta prioridade.\n");
+        //         if (!fila_vazia(fila_baixa_prioridade) && processo_atual.pid == fila_baixa_prioridade->inicio->processo.pid) printf("O processo P%d sofreu preempcao, vai pra fila de baixa prioridade.\n",
+        //             processo_atual.pid);
+        //         enfileira(fila_alta_prioridade, entrada_saida_atual);
+        //     } else
+        //         enfileira_inicio(fila_impressora, entrada_saida_atual);
+        // }
 
         if (!verifica_processador(fila_alta_prioridade, fila_baixa_prioridade) &&
-            !verifica_io(fila_disco, fila_fita, fila_impressora)) {
+            !verifica_io(fila_disco, fila_fita)) {
             printf("Nenhuma fila com processos, o processador esta ocioso.\n");
         } else
-            imprime_todas_filas(fila_alta_prioridade, fila_baixa_prioridade, fila_disco, fila_fita, fila_impressora);
+            imprime_todas_filas(fila_alta_prioridade, fila_baixa_prioridade, fila_disco, fila_fita);
 
         tempo_atual++;
     }
@@ -176,11 +179,11 @@ int verifica_processador(Fila *fila_alta_prioridade, Fila *fila_baixa_prioridade
     return !fila_vazia(fila_alta_prioridade) || !fila_vazia(fila_baixa_prioridade);
 }
 
-int verifica_io(Fila *fila_disco, Fila *fila_fita, Fila *fila_impressora) {
-    return !fila_vazia(fila_disco) || !fila_vazia(fila_fita) || !fila_vazia(fila_impressora);
+int verifica_io(Fila *fila_disco, Fila *fila_fita) {
+    return !fila_vazia(fila_disco) || !fila_vazia(fila_fita);
 }
 
-void envia_para_io(Processo processo, Fila *fila_disco, Fila *fila_fita, Fila *fila_impressora) {
+void envia_para_io(Processo processo, Fila *fila_disco, Fila *fila_fita) {
     printf("O processo P%d foi para a fila de E/S (%s).\n", processo.pid, seleciona_tipo_io(processo.operacoes_io[processo.operacao_io_atual].tipo_io));
 
     switch (processo.operacoes_io[processo.operacao_io_atual].tipo_io) {
@@ -194,12 +197,6 @@ void envia_para_io(Processo processo, Fila *fila_disco, Fila *fila_fita, Fila *f
             if (!fila_vazia(fila_fita))
                 processo.status_processo = ENTRADA_SAIDA;
             enfileira(fila_fita, processo);
-            break;
-
-        case IMPRESSORA:
-            if (!fila_vazia(fila_impressora))
-                processo.status_processo = ENTRADA_SAIDA;
-            enfileira(fila_impressora, processo);
             break;
     }
 }
