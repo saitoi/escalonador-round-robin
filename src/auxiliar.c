@@ -34,6 +34,74 @@ void valida_entrada_inteiro(const char *mensagem, int *variavel, int min, int ma
     } while(!opcao_valida);
 }
 
+int gerar_dado_aleatorio(int min, int max) {
+    return min + rand() % (max - min + 1);
+}
+
+int parse_linha_csv(char *linha, Processo *processo) {
+    char *token;
+    int idx = 0;
+
+    memset(processo, 0, sizeof(Processo));
+
+    token = strtok(linha, ",");
+    while (token != NULL) {
+        switch (idx) {
+            case 0:
+                processo->pid = atoi(token);
+                break;
+            case 1:
+                processo->instante_chegada = atoi(token);
+                break;
+            case 2:
+                processo->tempo_cpu = atoi(token);
+                processo->tempo_cpu_restante = processo->tempo_cpu;
+                processo->tempo_quantum_restante = 0;
+                processo->tempo_cpu_atual = 0;
+                processo->status_processo = PRONTO;
+                break;
+            case 3:
+                processo->num_operacoes_io = atoi(token);
+                if (processo->num_operacoes_io > 0) {
+                    processo->operacoes_io = aloca_operacoes_io(processo->num_operacoes_io);
+                    if (!processo->operacoes_io) {
+                        tratar_erro_alocacao("Erro ao alocar operações de IO.\n");
+                        return 0;
+                    }
+                    processo->operacao_io_atual = 0;
+                }
+                break;
+            default:
+                if (processo->num_operacoes_io > 0) {
+                    int io_idx = (idx - 4) / 2;
+                    int io_field = (idx - 4) % 2;
+                    if (io_idx < processo->num_operacoes_io) {
+                        if (io_field == 0) {
+                            processo->operacoes_io[io_idx].tipo_io = atoi(token);
+                            processo->operacoes_io[io_idx].duracao_io = seleciona_tempo_io(processo->operacoes_io[io_idx].tipo_io);
+                            processo->operacoes_io[io_idx].tempo_restante = processo->operacoes_io[io_idx].duracao_io;
+                        } else {
+                            processo->operacoes_io[io_idx].tempo_inicio = atoi(token);
+                        }
+                    }
+                }
+                break;
+        }
+        idx++;
+        token = strtok(NULL, ",");
+    }
+
+    if (idx < 4) {
+        return 0;
+    }
+
+    if (processo->num_operacoes_io > 0) {
+        quicksort_operacoes_io(processo->operacoes_io, 0, processo->num_operacoes_io - 1);
+    }
+
+    return 1;
+}
+
 void quicksort(OperacaoIO *operacoes_io, int inicio, int fim) {
     int pos_pivo = 0;
 
