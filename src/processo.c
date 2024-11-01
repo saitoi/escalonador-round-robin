@@ -3,7 +3,6 @@
 
 #include "../include/processo.h"
 #include "../include/auxiliar.h"
-#include "../include/escalonador.h"
 
 #define TEMPO_MIN_CPU 5     /* Tempo minimo de CPU */
 #define TEMPO_MAX_CPU 10    /* Tempo maximo de CPU */
@@ -124,7 +123,7 @@ Processo *criar_processo_aleatorio(int pid) {
         }
 
         /* Ordena as operações de IO pelo tempo de início */
-        quicksort_operacoes_io(processo->operacoes_io, 0, processo->num_operacoes_io - 1);
+        quicksort(processo->operacoes_io, 0, processo->num_operacoes_io - 1);
     }
 
     return processo;

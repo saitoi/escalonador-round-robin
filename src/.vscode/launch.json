@@ -1,0 +1,13 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "C/C++ Runner: Debug Session",
+      "type": "lldb",
+      "request": "launch",
+      "args": [],
+      "cwd": "/Users/pedrosaito/Library/Mobile Documents/com~apple~CloudDocs/code/university/arq-comp/trabalho-1/src",
+      "program": "/Users/pedrosaito/Library/Mobile Documents/com~apple~CloudDocs/code/university/arq-comp/trabalho-1/src/build/Debug/outDebug"
+    }
+  ]
+}

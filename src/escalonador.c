@@ -118,6 +118,8 @@ void escalonador(Processo *processos, Fila *fila_alta_prioridade, Fila *fila_bai
             imprime_todas_filas(fila_alta_prioridade, fila_baixa_prioridade, fila_disco, fila_fita);
 
         tempo_atual++;
+        if (tempo_atual == 20)
+            break;
     }
 
     printf("\nNao ha mais processos, e portanto, o escalonamento foi finalizado com sucesso.\n");

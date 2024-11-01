@@ -1,6 +1,7 @@
 #ifndef PROCESSO_H
 #define PROCESSO_H
 
+#define MAXIMO_PROCESSOS 4      /* Numero maximo de processos */
 #define TEMPO_DISCO 2           /* Tempo de execucao de disco */
 #define TEMPO_FITA 3            /* Tempo de execucao de fita */
 #define QUANTIDADE_TIPOS_IO 2   /* Quantidade de tipos de E/S */

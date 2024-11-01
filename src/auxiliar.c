@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "../include/auxiliar.h"
 #include "../include/processo.h"
@@ -96,7 +97,7 @@ int parse_linha_csv(char *linha, Processo *processo) {
     }
 
     if (processo->num_operacoes_io > 0) {
-        quicksort_operacoes_io(processo->operacoes_io, 0, processo->num_operacoes_io - 1);
+        quicksort(processo->operacoes_io, 0, processo->num_operacoes_io - 1);
     }
 
     return 1;

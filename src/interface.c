@@ -12,7 +12,7 @@ void imprime_menu(void) {
     printf("║      SIMULADOR ROUND ROBIN COM FEEDBACK      ║\n");
     printf("╚══════════════════════════════════════════════╝\n");
     printf("║  1. Carregar dados de arquivo externo (CSV). ║\n");
-    printf("║  2. Gerar dados  \"aleatoriamente\".         ║\n");
+    printf("║  2. Gerar dados  \"aleatoriamente\".           ║\n");
     printf("║  3. Sair.                                    ║\n");
     printf("╚══════════════════════════════════════════════╝\n");
 }

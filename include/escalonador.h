@@ -1,7 +1,7 @@
 #ifndef ESCALONADOR_H
 #define ESCALONADOR_H
 
-#define MAXIMO_PROCESSOS 4 /* Numero maximo de processos */
+// #define MAXIMO_PROCESSOS 4 /* Numero maximo de processos */
 #define QUANTUM 2 /* Quantum de tempo */
 
 /* Funcao que simula o escalonador */
