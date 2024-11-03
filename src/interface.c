@@ -17,10 +17,21 @@ void imprime_menu(void) {
     printf("╚══════════════════════════════════════════════╝\n");
 }
 
+void imprime_instante(int tempo_atual) {
+    printf("\n┌────────────────────────────────────┐\n");
+    printf("│         >>> INSTANTE %02d <<<        │\n", tempo_atual);
+    printf("└────────────────────────────────────┘\n");
+}
+
 // TODO: Reduzir parâmetros dessa função
 void processa_menu(Fila *fila_alta_prioridade, Fila *fila_baixa_prioridade, Fila *fila_disco, Fila *fila_fita) {
-    Processo *processos = NULL;
+    ListaProcessos *lista = malloc(sizeof(ListaProcessos));
     int opcao = -1;
+    if (lista == NULL) {
+        tratar_erro_alocacao("Erro na alocação de memória para lista de processos.\n");
+        exit(-1);
+    }
+
 
     imprime_menu();
 
@@ -28,15 +39,15 @@ void processa_menu(Fila *fila_alta_prioridade, Fila *fila_baixa_prioridade, Fila
 
     switch (opcao) {
         case 1:
-            processos = criar_processos_csv("processos.csv");
-            if (!processos) {
+            *lista = criar_lista_processos_csv("processos.csv");
+            if (!lista->processos) {
                 tratar_erro_alocacao("Erro ao carregar processos do arquivo.\n");
                 exit(1);
             }
             break;
         case 2:
-            processos = criar_processos_aleatorios();
-            if (!processos) {
+            *lista = criar_lista_processos_aleatorios();
+            if (!lista->processos) {
                 tratar_erro_alocacao("Erro ao alocar processos iniciais.\n");
                 exit(1);
             }
@@ -49,7 +60,7 @@ void processa_menu(Fila *fila_alta_prioridade, Fila *fila_baixa_prioridade, Fila
             return;
     }
 
-    escalonador(processos,
+    escalonador(lista,
                 fila_alta_prioridade,
                 fila_baixa_prioridade,
                 fila_disco,
@@ -60,55 +71,48 @@ void processa_menu(Fila *fila_alta_prioridade, Fila *fila_baixa_prioridade, Fila
 
 void imprime_todas_filas(Fila *fila_alta_prioridade, Fila *fila_baixa_prioridade, Fila *fila_disco, Fila *fila_fita) {
     printf("\n");
-    imprime_fila("  Alta Prioridade  ", fila_alta_prioridade);
-    imprime_fila("  Baixa Prioridade ", fila_baixa_prioridade);
-    imprime_fila("       Disco       ", fila_disco);
-    imprime_fila("️       Fita        ", fila_fita);
+    imprime_fila(" ALTA PRIORIDADE  ", fila_alta_prioridade);
+    imprime_fila(" BAIXA PRIORIDADE ", fila_baixa_prioridade);
+    imprime_fila(" DISCO ", fila_disco);
+    imprime_fila("️ FITA ", fila_fita);
 }
 
 void imprime_fila(const char *nome_fila, Fila *fila) {
     if (fila == NULL || fila_vazia(fila)) {
-        printf("╔═════════════════════════════════════╗\n");
-        printf("║  %s: Vazia                          ║\n", nome_fila);
-        printf("╚═════════════════════════════════════╝\n");
+        printf("%s: Vazia\n\n", nome_fila);
         return;
     }
 
-    int count = 0;
+    printf("%s:\n", nome_fila);
+
     No *current = fila->inicio;
-    while (current != NULL) {
-        count++;
-        current = current->prox;
-    }
 
-    printf("╔═════════════════════════════════════╗\n");
-    printf("║  %s:                                ║\n", nome_fila);
-    printf("╠═════════════════════════════════════╣\n");
-    
-    // Imprime os elementos da fila em estilo gráfico
-    printf("║  ┌─────────");
-    for (int i = 1; i < count; i++) {
+    // Imprime o topo da fila
+    printf("  ┌─────────");
+    while (current->prox != NULL) {
         printf("┬─────────");
-    }
-    printf("┐     ║\n");
-
-    current = fila->inicio;
-    if (current != NULL) {
-        printf("║  │   P%d    ", current->processo.pid);
         current = current->prox;
-        while (current != NULL) {
-            printf("│   P%d    ", current->processo.pid);
-            current = current->prox;
-        }
-        printf("│     ║\n");
     }
+    printf("┐\n");
 
-    printf("║  └─────────");
-    for (int i = 1; i < count; i++) {
+    // Reseta o ponteiro para o início da fila
+    current = fila->inicio;
+
+    // Imprime os processos na fila
+    printf("  │   P%d    ", current->processo.pid);
+    current = current->prox;
+    while (current != NULL) {
+        printf("│   P%d    ", current->processo.pid);
+        current = current->prox;
+    }
+    printf("│\n");
+
+    // Imprime a base da fila
+    printf("  └─────────");
+    current = fila->inicio;
+    while (current->prox != NULL) {
         printf("┴─────────");
+        current = current->prox;
     }
-    printf("┘     ║\n");
-
-    printf("╚═════════════════════════════════════╝\n");
+    printf("┘\n");
 }
-
