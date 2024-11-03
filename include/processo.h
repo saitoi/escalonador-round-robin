@@ -1,6 +1,11 @@
 #ifndef PROCESSO_H
 #define PROCESSO_H
 
+#define TEMPO_MIN_CPU 5     /* Tempo minimo de CPU */
+#define TEMPO_MAX_CPU 10    /* Tempo maximo de CPU */
+#define TEMPO_MIN_CHEGADA 0 /* Tempo maximo de inicio */
+#define TEMPO_MAX_CHEGADA 4 /* Tempo maximo de inicio */
+
 #define MAXIMO_PROCESSOS 4      /* Numero maximo de processos */
 #define TEMPO_DISCO 2           /* Tempo de execucao de disco */
 #define TEMPO_FITA 3            /* Tempo de execucao de fita */
@@ -29,6 +34,8 @@ typedef enum _StatusProcesso {
 
 /* Estrutura para armazenar os processos */
 typedef struct _Processo {
+    OperacaoIO *operacoes_io;   /* Vetor de operacoes de E/S */
+    StatusProcesso status_processo; /* Status do processo */
     int pid;                    /* Identificador do processo */
     int instante_chegada;       /* Tempo de inicio do processo */
     int tempo_cpu;              /* Tempo de CPU do processo */
@@ -37,12 +44,15 @@ typedef struct _Processo {
     int tempo_quantum_restante; /* Tempo de quantum restante do processo */
     int tempo_cpu_restante;     /* Tempo de CPU restante do processo */
     int tempo_cpu_atual;        /* Tempo de CPU atual do processo */
-
-    OperacaoIO *operacoes_io;   /* Vetor de operacoes de E/S */
     int num_operacoes_io;       /* Quantidade de operacoes de E/S */
     int operacao_io_atual;      /* Indice da operacao de E/S atual */
-    StatusProcesso status_processo; /* Status do processo */
 } Processo;
+
+/* Estrutura para englobar todos os processos */
+typedef struct _ListaProcessos {
+    Processo *processos;        /* Array de todos processos inicializados */
+    int quantidade;             /* Quantidade de processos ativos */
+} ListaProcessos;
 
 /* Funcao para alocar o espaco de um processo */
 /* Nao recebe parametros */
@@ -79,17 +89,20 @@ const char *seleciona_status_processo(StatusProcesso status_processo);
 /* Retorna um ponteiro para os processos criados */
 Processo *criar_processos_aleatorios();
 
+/* Funcao para criar uma lista com quantidade máxima de processos aleatórios */
+/* Retorna uma lista de processos aleatorios */
+ListaProcessos criar_lista_processos_aleatorios(void);
 
 /* Funcao para criar um processo com seed aleatória */
 /* Recebe o pid do processo */
 /* Retorna um ponteiro para os processos criados */
-Processo *criar_processo_aleatorio(int pid);
+Processo criar_processo_aleatorio(int pid);
 
 
 /* Funcao para criar um processo a partir da leitura do CSV */
 /* Recebe o nome do arquivo para leitura dos dados */
 /* Retorna um ponteiro para os processos criados */
-Processo *criar_processos_csv(const char *nome_arquivo);
+ListaProcessos criar_lista_processos_csv(const char *nome_arquivo);
 
 
 /* Funcao para inicializar os processos */

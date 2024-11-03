@@ -6,6 +6,10 @@
 /* Nao retorna valores */
 void processa_menu(Fila *fila_alta_prioridade, Fila *fila_baixa_prioridade, Fila *fila_disco, Fila *fila_fita);
 
+/* Funcao que imprime o instante atual */
+/* Nao retorna valores */
+void imprime_instante(int tempo_atual);
+
 /* Funcao que imprime o menu para a seleção do usuário */
 /* Nao retorna valores */
 void imprime_menu(void);
