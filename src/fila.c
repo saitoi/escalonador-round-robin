@@ -32,7 +32,7 @@ int fila_vazia(Fila *fila) {
 No *aloca_no(void) {
     No *no = (No *) malloc(sizeof(No));
 
-    if (no == NULL) {
+    if (!no) {
         tratar_erro_alocacao("Falha ao alocar struct.\n");
         return NULL;
     }
@@ -73,7 +73,7 @@ Processo desenfileira(Fila *fila) {
     Processo processo;
 
     if (fila_vazia(fila)) {
-        printf("Fila vazia.\n");
+        printf("Fila vazia.\n"); /* Conflito de lógica (Erro no código ou entradas): exit(-1) */
         exit(1);
     }
 
@@ -98,32 +98,3 @@ void esvazia_fila(Fila *fila) {
         free(aux);
     }
 }
-
-// void imprime_fila(Fila *fila) {
-//     No *atual = fila->inicio;
-
-//     if (fila_vazia(fila)) {
-//         printf("\n");
-//         return;
-//     }
-
-//     while (atual != NULL) {
-//         printf("P%d ", atual->processo.pid);
-//         atual = atual->prox;
-//     }
-//     printf("\n");
-// }
-
-/*void imprime_fila_formatada(const char *nome_fila, Fila *fila) {*/
-/*    printf("%s: ", nome_fila);*/
-/*    imprime_fila(fila);*/
-/*}*/
-/**/
-/*void imprime_filas(Fila *fila_alta_prioridade, Fila *fila_baixa_prioridade, Fila *fila_disco, Fila *fila_fita, Fila *fila_impressora) {*/
-/*    printf("\n");*/
-/*    imprime_fila_formatada("Fila de alta prioridade", fila_alta_prioridade);*/
-/*    imprime_fila_formatada("Fila de baixa prioridade", fila_baixa_prioridade);*/
-/*    imprime_fila_formatada("Fila de disco", fila_disco);*/
-/*    imprime_fila_formatada("Fila de fita", fila_fita);*/
-/*    imprime_fila_formatada("Fila de impressora", fila_impressora);*/
-/*}*/
