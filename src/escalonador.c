@@ -1,16 +1,19 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <ctype.h>
 
+// Corrigir dependências malucas
 #include "../include/fila.h"
-#include "../include/escalonador.h"
 #include "../include/processo.h"
-#include "../include/fila.h"
+#include "../include/escalonador.h"
 #include "../include/interface.h"
+#include "../include/auxiliar.h"
 
 
-void escalonador(Processo *processos, Fila *fila_alta_prioridade, Fila *fila_baixa_prioridade, Fila *fila_disco, Fila *fila_fita) {
+void escalonador(ListaProcessos *lista, Fila *fila_alta_prioridade, Fila *fila_baixa_prioridade, Fila *fila_disco, Fila *fila_fita) {
 
     int tempo_atual = 0,
+        qtd_processos = 0,
         num_processos_finalizados = 0;
 
     Processo processo_atual,
@@ -18,30 +21,33 @@ void escalonador(Processo *processos, Fila *fila_alta_prioridade, Fila *fila_bai
 
     // Chamado uma única vez para imprimir os dados iniciais dos processos
     // TODO: Transformar em função da interface
-    imprime_informacao_processos(processos);
+    imprime_informacao_processos(*lista);
 
-    while (num_processos_finalizados < MAXIMO_PROCESSOS) {
-        // TODO: Transformar em função de `interface.c`
-        printf("\n╔═════════════════════════════════════╗\n");
-        printf("║          >>> INSTANTE %d <<<        ║\n", tempo_atual);
-        printf("╠═════════════════════════════════════╣\n");
+    // Após exibir o conteúdo dos processos, pede confirmação do usuário para prosseguir
+    confirmacao_usuario();
 
-        verifica_novos_processos(processos, tempo_atual, fila_alta_prioridade);
+    while (num_processos_finalizados < lista->quantidade) {
+        imprime_instante(tempo_atual);
+
+        verifica_novos_processos(lista->processos, tempo_atual, fila_alta_prioridade);
 
         if (!fila_vazia(fila_alta_prioridade)) {
             processo_atual = desenfileira(fila_alta_prioridade);
             executa_processo(&processo_atual);
 
+            /* Verifica se algum processo finalizou */
             if (processo_finalizado(&processo_atual)) {
-                atualiza_tempo_turnaround(&processo_atual, tempo_atual, processos);
+                atualiza_tempo_turnaround(&processo_atual, tempo_atual, lista->processos);
                 num_processos_finalizados++;
             }
 
+            /* Verifica inicio de operacao de I/O */
             else if (tempo_inicio_io(&processo_atual))
                 envia_para_io(processo_atual, fila_disco, fila_fita);
 
+            /* Verifica finalização do quantum, c.c. vai para fila de baixa prioridade */
             else if (tempo_quantum_completo(&processo_atual, QUANTUM)) {
-                printf("O processo P%d sofreu preempcao, vai pra fila de baixa prioridade.\n",
+                printf(" P%d sofreu preempcao, vai pra fila de baixa prioridade.\n",
                     processo_atual.pid);
                 enfileira(fila_baixa_prioridade, processo_atual);
             }
@@ -55,7 +61,7 @@ void escalonador(Processo *processos, Fila *fila_alta_prioridade, Fila *fila_bai
             executa_processo(&processo_atual);
 
             if (processo_finalizado(&processo_atual)) {
-                atualiza_tempo_turnaround(&processo_atual, tempo_atual, processos);
+                atualiza_tempo_turnaround(&processo_atual, tempo_atual, lista->processos);
                 num_processos_finalizados++;
             }
 
@@ -63,7 +69,7 @@ void escalonador(Processo *processos, Fila *fila_alta_prioridade, Fila *fila_bai
                 envia_para_io(processo_atual, fila_disco, fila_fita);
 
             else if (tempo_quantum_completo(&processo_atual, QUANTUM)) {
-                printf("O processo P%d sofreu preempcao, vai pra fila de baixa prioridade.\n",
+                printf(" P%d sofreu preempcao, vai pra fila de baixa prioridade.\n",
                     processo_atual.pid);
                 enfileira(fila_baixa_prioridade, processo_atual);
             }
@@ -88,8 +94,8 @@ void escalonador(Processo *processos, Fila *fila_alta_prioridade, Fila *fila_bai
             executa_io(&entrada_saida_atual);
 
             if (io_finalizada(&entrada_saida_atual)) {
-                printf(" vai para a fila de alta prioridade.\n");
-                if (!fila_vazia(fila_baixa_prioridade) && processo_atual.pid == fila_baixa_prioridade->inicio->processo.pid) printf("O processo P%d sofreu preempcao, vai pra fila de baixa prioridade.\n",
+                printf(" vai para a fila de alta prioridade.\n"); // Essa parte não fez tanto sentido..
+                if (!fila_vazia(fila_baixa_prioridade) && processo_atual.pid == fila_baixa_prioridade->inicio->processo.pid) printf(" P%d sofreu preempcao, vai pra fila de baixa prioridade.\n",
                     processo_atual.pid);
                 enfileira(fila_alta_prioridade, entrada_saida_atual);
             } else
@@ -118,53 +124,109 @@ void escalonador(Processo *processos, Fila *fila_alta_prioridade, Fila *fila_bai
             imprime_todas_filas(fila_alta_prioridade, fila_baixa_prioridade, fila_disco, fila_fita);
 
         tempo_atual++;
-        if (tempo_atual == 20)
-            break;
     }
 
     printf("\nNao ha mais processos, e portanto, o escalonamento foi finalizado com sucesso.\n");
 
     printf("\n============ FIM DO ESCALONAMENTO ============\n");
     printf("\nTempos de turnaround de cada um dos processos: \n\n");
-    imprime_tempos_turnaround(processos);
+    imprime_turnaround_processos(lista->processos, lista->quantidade);
 
-    free(processos);
+    free(lista->processos);
 }
 
-void imprime_informacao_processos(Processo *processos) {
-    if (processos != NULL) {
-        int i = 0;
+// void imprime_informacao_processos(Processo *processos) {
+//     if (processos != NULL) {
+//         int i = 0;
 
-        printf("================================== PROCESSOS ==================================\n");
+//         printf("================================== PROCESSOS ==================================\n");
 
-        printf("\nPID\tTempo de servico\tTempo de inicio\t\tE/S (Tempo de inicio)\n");
+//         printf("\nPID\tTempo de servico\tTempo de inicio\t\tE/S (Tempo de inicio)\n");
 
-        for (i = 0; i < MAXIMO_PROCESSOS; i++) {
-            printf("P%d\t\t%d\t\t\t%d\t\t", processos[i].pid, processos[i].tempo_cpu, processos[i].instante_chegada);
+//         for (i = 0; i < MAXIMO_PROCESSOS; i++) {
+//             printf("P%d\t\t%d\t\t\t%d\t\t", processos[i].pid, processos[i].tempo_cpu, processos[i].instante_chegada);
 
-            if (processos[i].num_operacoes_io == 0)
+//             if (processos[i].num_operacoes_io == 0)
+//                 printf("Nenhuma operacao de E/S.");
+//             else {
+//                 int j = 0;
+//                 for (j = 0; j < processos[i].num_operacoes_io; j++) {
+//                     printf("%s (%d)", seleciona_tipo_io(processos[i].operacoes_io[j].tipo_io), processos[i].operacoes_io[j].tempo_inicio);
+
+//                     if (j < processos[i].num_operacoes_io - 1)
+//                         printf(", ");
+//                 }
+//             }
+//             printf("\n");
+//         }
+//     } else printf("Sem processos.\n");
+// }
+
+void imprime_informacao_processos(ListaProcessos lista) {
+    if (lista.processos != NULL && lista.quantidade > 0) {
+        printf("\n═══════════════════════════════════════ PROCESSOS ═══════════════════════════════════════\n");
+        printf(" PID\tTempo de Servico\tTempo de Inicio\t\tE/S (Tempo de Inicio)\n");
+        printf("─────────────────────────────────────────────────────────────────────────────────────────\n");
+
+        for (int i = 0; i < lista.quantidade; i++) {
+            printf(" P%d\t\t%d\t\t\t%d\t\t", lista.processos[i].pid, lista.processos[i].tempo_cpu, lista.processos[i].instante_chegada);
+
+            if (lista.processos[i].num_operacoes_io == 0) {
                 printf("Nenhuma operacao de E/S.");
-            else {
-                int j = 0;
-                for (j = 0; j < processos[i].num_operacoes_io; j++) {
-                    printf("%s (%d)", seleciona_tipo_io(processos[i].operacoes_io[j].tipo_io), processos[i].operacoes_io[j].tempo_inicio);
+            } else {
+                for (int j = 0; j < lista.processos[i].num_operacoes_io; j++) {
+                    printf("%s (%d)", seleciona_tipo_io(lista.processos[i].operacoes_io[j].tipo_io), lista.processos[i].operacoes_io[j].tempo_inicio);
 
-                    if (j < processos[i].num_operacoes_io - 1)
+                    if (j < lista.processos[i].num_operacoes_io - 1) {
                         printf(", ");
+                    }
                 }
             }
             printf("\n");
         }
-    } else printf("Sem processos.\n");
+
+        printf("═════════════════════════════════════════════════════════════════════════════════════════\n");
+    } else {
+        printf("Sem processos.\n");
+    }
 }
 
-void verifica_novos_processos(Processo *processos, int tempo_atual, Fila *fila) {
+void confirmacao_usuario(void) {
+    char confirmacao = 1;
+    valida_entrada_char("Aqui estão os dados dos processos, deseja prosseguir? ", &confirmacao);
+    if (toupper(confirmacao) != 'N')
+        return;
+    else
+        exit(1);
+}
+
+
+void verifica_novos_processos(Processo *processos, int tempo_atual, Fila *fila_alta_prioridade) {
     int i = 0;
     for (i = 0; i < MAXIMO_PROCESSOS; i++)
         if (processos[i].instante_chegada == tempo_atual) {
-            enfileira(fila, processos[i]);
-            printf("O processo P%d entrou na fila de alta prioridade.\n", processos[i].pid);
+            enfileira(fila_alta_prioridade, processos[i]);
+            printf(" P%d entrou na fila de alta prioridade.\n", processos[i].pid);
         }
+}
+
+void imprime_turnaround_processos(Processo *processos, int quantidade) {
+    float turnaround_medio = 0,
+          tempo_espera_medio = 0;
+
+    printf("\n═══════════════════════════════════════ TURNAROUND ══════════════════════════════════════\n");
+    printf(" PID\tTempo de Turnaround\tTempo de Espera\n");
+    printf("─────────────────────────────────────────────────────────────────────────────────────────\n");
+
+    for (int i = 0; i < quantidade; i++) {
+        printf(" P%d\t\t%d u.t.\t\t %d u.t.\n", i, processos[i].tempo_turnaround, processos[i].tempo_turnaround - processos[i].tempo_cpu);
+        turnaround_medio += (float) processos[i].tempo_turnaround;
+        tempo_espera_medio += (float) processos[i].tempo_turnaround - processos[i].tempo_cpu;
+    }
+
+    printf("═════════════════════════════════════════════════════════════════════════════════════════\n");
+    printf(" Turnaround médio: %.2f u.t.\n", turnaround_medio / quantidade);
+    printf(" Tempo de espera médio: %.2f u.t.\n", tempo_espera_medio / quantidade);
 }
 
 void imprime_tempos_turnaround(Processo *processos) {
@@ -186,7 +248,7 @@ int verifica_io(Fila *fila_disco, Fila *fila_fita) {
 }
 
 void envia_para_io(Processo processo, Fila *fila_disco, Fila *fila_fita) {
-    printf("O processo P%d foi para a fila de E/S (%s).\n", processo.pid, seleciona_tipo_io(processo.operacoes_io[processo.operacao_io_atual].tipo_io));
+    printf(" P%d foi para a fila de E/S (%s).\n", processo.pid, seleciona_tipo_io(processo.operacoes_io[processo.operacao_io_atual].tipo_io));
 
     switch (processo.operacoes_io[processo.operacao_io_atual].tipo_io) {
         case DISCO:
@@ -203,9 +265,9 @@ void envia_para_io(Processo processo, Fila *fila_disco, Fila *fila_fita) {
     }
 }
 
-void atualiza_tempo_turnaround(Processo *processo, int turnaround, Processo *processos) {
+void atualiza_tempo_turnaround(Processo *processo, int instante_fim, Processo *processos) {
     int i = 0;
     for (i = 0; i < MAXIMO_PROCESSOS; i++)
         if (processos[i].pid == processo->pid)
-            processos[i].tempo_turnaround = turnaround - processos[i].instante_chegada;
+            processos[i].tempo_turnaround = instante_fim - processos[i].instante_chegada;
 }
