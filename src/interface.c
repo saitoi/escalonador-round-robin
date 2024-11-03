@@ -67,8 +67,6 @@ void processa_menu(Fila *fila_alta_prioridade, Fila *fila_baixa_prioridade, Fila
                 fila_fita);
 }
 
-
-
 void imprime_todas_filas(Fila *fila_alta_prioridade, Fila *fila_baixa_prioridade, Fila *fila_disco, Fila *fila_fita) {
     printf("\n");
     imprime_fila(" ALTA PRIORIDADE  ", fila_alta_prioridade);
