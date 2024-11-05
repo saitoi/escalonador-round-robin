@@ -1,24 +1,33 @@
 #ifndef ESCALONADOR_H
 #define ESCALONADOR_H
 
+// #define MAXIMO_PROCESSOS 4 /* Numero maximo de processos */
 #define QUANTUM 2 /* Quantum de tempo */
-#define MAXIMO_PROCESSOS 4 /* Numero maximo de processos */
 
 /* Funcao que simula o escalonador */
-/* Recebe os processos a serem executados e as filas de alta prioridade, de baixa prioridade, de disco, de fita e de impressora */
+/* Recebe os processos a serem executados e as filas de alta prioridade, de baixa prioridade, de disco e de fita */
 /* Nao retorna valores */
-void escalonador(Processo *processos,
-    Fila *fila_alta_prioridade, Fila *fila_baixa_prioridade, Fila *fila_disco, Fila *fila_fita, Fila *fila_impressora);
+void escalonador(ListaProcessos *lista,
+    Fila *fila_alta_prioridade, Fila *fila_baixa_prioridade, Fila *fila_disco, Fila *fila_fita);
 
 /* Funcao que imprime a informacao dos processos */
 /* Recebe os processos a serem impressos */
 /* Nao retorna valores */
-void imprime_informacao_processos(Processo *processos);
+void imprime_informacao_processos(ListaProcessos lista);
+
+/* Funcao que solicita confirmação do usuário antes de prosseguir o programa */
+/* Nao retorna valores */
+void confirmacao_usuario(void);
 
 /* Funcao que imprime a informacao dos processos */
 /* Recebe os processos a serem impressos */
 /* Nao retorna valores */
 void verifica_novos_processos(Processo *processos, int tempo_atual, Fila *fila);
+
+/* Funcao que imprime a turnaround dos processos */
+/* Recebe os processos e a quantidade de processos, cujos turnarounds serão impressos */
+/* Nao retorna valores */
+void imprime_turnaround_processos(Processo *processos, int quantidade);
 
 /* Funcao que imprime o tempo de turnaround */
 /* Recebe os processos cujos tempos de turnaround serao impressos */
@@ -30,15 +39,15 @@ void imprime_tempos_turnaround(Processo *processos);
 /* Retorna 1 caso haja processos em uma ou nas duas filas, 0 caso contrario */
 int verifica_processador(Fila *fila_alta_prioridade, Fila *fila_baixa_prioridade);
 
-/* Funcao que verifica se ha processos nas filas de disco, de fita e de impressora */
-/* Recebe as filas de disco, de fita e de impressora */
+/* Funcao que verifica se ha processos nas filas de disco e de fita*/
+/* Recebe as filas de disco e de fita */
 /* Retorna 1 caso haja processos em uma ou nas tres filas, 0 caso contrario */
-int verifica_io(Fila *fila_disco, Fila *fila_fita, Fila *fila_impressora);
+int verifica_io(Fila *fila_disco, Fila *fila_fita);
 
 /* Funcao que envia um processo para uma das filas de E/S */
-/* Recebe o processo a ser enviado e as filas de disco, de fita e de impressora */
+/* Recebe o processo a ser enviado e as filas de disco e de fita */
 /* Nao retorna valores */
-void envia_para_io(Processo processo, Fila *fila_disco, Fila *fila_fita, Fila *fila_impressora);
+void envia_para_io(Processo processo, Fila *fila_disco, Fila *fila_fita);
 
 /* Funcao que atualiza o tempo de turnaround de um processo */
 /* Recebe o processo cujo tempo de turnaround sera atualizado, o tempo de turnaround e os processos */
