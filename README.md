@@ -1,4 +1,7 @@
-# Escalonador de Processos - Algoritmo Round-Robin com Feedback
+<div align="center">
+    <h1>Escalonador de Processos </br>
+    Algoritmo Round-Robin com Feedback</h1>
+</div>
 
 *Descrição concisa do projeto*
 
