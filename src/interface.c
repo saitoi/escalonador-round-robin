@@ -11,10 +11,10 @@ void imprime_menu(void) {
     printf("╔══════════════════════════════════════════════╗\n");
     printf("║      SIMULADOR ROUND ROBIN COM FEEDBACK      ║\n");
     printf("╚══════════════════════════════════════════════╝\n");
-    printf("║  1. Carregar dados de arquivo externo (CSV). ║\n");
-    printf("║  2. Gerar dados  \"aleatoriamente\".           ║\n");
-    printf("║  3. Sair.                                    ║\n");
-    printf("╚══════════════════════════════════════════════╝\n");
+    printf("│  1. Carregar dados de arquivo externo (CSV). │\n");
+    printf("│  2. Gerar dados aleatoriamente.              │\n");
+    printf("│  3. Sair.                                    │\n");
+    printf("└──────────────────────────────────────────────┘\n");
 }
 
 void imprime_instante(int tempo_atual) {
