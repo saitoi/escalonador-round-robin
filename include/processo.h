@@ -6,7 +6,7 @@
 #define TEMPO_MIN_CHEGADA 0 /* Tempo maximo de inicio */
 #define TEMPO_MAX_CHEGADA 4 /* Tempo maximo de inicio */
 
-#define MAXIMO_PROCESSOS 4      /* Numero maximo de processos */
+#define MAXIMO_PROCESSOS 5      /* Numero maximo de processos */
 #define TEMPO_DISCO 2           /* Tempo de execucao de disco */
 #define TEMPO_FITA 3            /* Tempo de execucao de fita */
 #define QUANTIDADE_TIPOS_IO 2   /* Quantidade de tipos de E/S */
