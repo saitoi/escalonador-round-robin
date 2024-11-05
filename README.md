@@ -19,8 +19,8 @@ Antes de compilar o projeto, certifique-se de que os seguintes programas estão 
 Para compilar o projeto, utilize o compilador de sua preferência (por exemplo, gcc ou clang):
 
 ```bash
-gcc -o main main.c
-clang -o main main.c
+gcc src/auxiliar.c src/escalonador.c src/fila.c src/interface.c src/main.c src/processo.c -o main
+clang src/auxiliar.c src/escalonador.c src/fila.c src/interface.c src/main.c src/processo.c -o main
 ```
 
 Após a compilação, execute o programa gerado com o comando:
