@@ -101,21 +101,6 @@ void escalonador(ListaProcessos *lista, Fila *fila_alta_prioridade, Fila *fila_b
                 enfileira_inicio(fila_fita, entrada_saida_atual);
         }
 
-        // Remover essa lógica
-
-        // if (!fila_vazia(fila_impressora)) {
-        //     entrada_saida_atual = desenfileira(fila_impressora);
-        //     executa_io(&entrada_saida_atual);
-
-        //     if (io_finalizada(&entrada_saida_atual)) {
-        //         printf(" vai para a fila de alta prioridade.\n");
-        //         if (!fila_vazia(fila_baixa_prioridade) && processo_atual.pid == fila_baixa_prioridade->inicio->processo.pid) printf("O processo P%d sofreu preempcao, vai pra fila de baixa prioridade.\n",
-        //             processo_atual.pid);
-        //         enfileira(fila_alta_prioridade, entrada_saida_atual);
-        //     } else
-        //         enfileira_inicio(fila_impressora, entrada_saida_atual);
-        // }
-
         if (!verifica_processador(fila_alta_prioridade, fila_baixa_prioridade) &&
             !verifica_io(fila_disco, fila_fita)) {
             printf("Nenhuma fila com processos, o processador esta ocioso.\n");
@@ -133,33 +118,6 @@ void escalonador(ListaProcessos *lista, Fila *fila_alta_prioridade, Fila *fila_b
 
     free(lista->processos);
 }
-
-// void imprime_informacao_processos(Processo *processos) {
-//     if (processos != NULL) {
-//         int i = 0;
-
-//         printf("================================== PROCESSOS ==================================\n");
-
-//         printf("\nPID\tTempo de servico\tTempo de inicio\t\tE/S (Tempo de inicio)\n");
-
-//         for (i = 0; i < MAXIMO_PROCESSOS; i++) {
-//             printf("P%d\t\t%d\t\t\t%d\t\t", processos[i].pid, processos[i].tempo_cpu, processos[i].instante_chegada);
-
-//             if (processos[i].num_operacoes_io == 0)
-//                 printf("Nenhuma operacao de E/S.");
-//             else {
-//                 int j = 0;
-//                 for (j = 0; j < processos[i].num_operacoes_io; j++) {
-//                     printf("%s (%d)", seleciona_tipo_io(processos[i].operacoes_io[j].tipo_io), processos[i].operacoes_io[j].tempo_inicio);
-
-//                     if (j < processos[i].num_operacoes_io - 1)
-//                         printf(", ");
-//                 }
-//             }
-//             printf("\n");
-//         }
-//     } else printf("Sem processos.\n");
-// }
 
 void imprime_informacao_processos(ListaProcessos lista) {
     if (lista.processos != NULL && lista.quantidade > 0) {
