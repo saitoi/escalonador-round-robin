@@ -19,17 +19,10 @@ Antes de compilar o projeto, certifique-se de que os seguintes programas estão 
 
 ## 🛠️ Instruções de Compilação
 
-Para compilar o projeto, utilize o compilador de sua preferência (por exemplo, gcc ou clang):
+Para compilar o projeto, certifique-se de ter instalado o compilador `gcc`. Com isso poderá executar o Makefile:
 
 ```bash
-gcc src/auxiliar.c src/escalonador.c src/fila.c src/interface.c src/main.c src/processo.c -o main
-clang src/auxiliar.c src/escalonador.c src/fila.c src/interface.c src/main.c src/processo.c -o main
+make
 ```
 
-Após a compilação, execute o programa gerado com o comando:
-
-```bash
-./main
-```
-
-
+A compilação e a execução do programa são realizadas simultaneamente.
