@@ -13,7 +13,6 @@
 void escalonador(ListaProcessos *lista, Fila *fila_alta_prioridade, Fila *fila_baixa_prioridade, Fila *fila_disco, Fila *fila_fita) {
 
     int tempo_atual = 0,
-        qtd_processos = 0,
         num_processos_finalizados = 0;
 
     Processo processo_atual,
