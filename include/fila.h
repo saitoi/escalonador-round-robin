@@ -58,19 +58,9 @@ Processo desenfileira(Fila *fila);
 /* Nao retorna valores */
 void esvazia_fila(Fila *fila);
 
-/* Funcao para imprimir uma fila */
-/* Recebe a fila a ser impressa */
-/* Nao retorna valores */
-// void imprime_fila(Fila *fila);
-
 /* Funcao para imprimir uma fila formatada */
 /* Recebe o nome da fila e a fila a ser impressa */
 /* Nao retorna valores */
 void imprime_fila_formatada(const char *nome_fila, Fila *fila);
-
-/* Funcao para imprimir todas as filas */
-/* Recebe as filas a serem impressas */
-/* Nao retorna valores */
-// void imprime_filas(Fila *fila_alta_prioridade, Fila *fila_baixa_prioridade, Fila *fila_disco, Fila *fila_fita, Fila *fila_impressora);
 
 #endif /* FILA_H */
