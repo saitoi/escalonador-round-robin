@@ -87,7 +87,7 @@ const char *seleciona_status_processo(StatusProcesso status_processo);
 /* Funcao para criar um processo com seed aleatória */
 /* Recebe o pid do processo */
 /* Retorna um ponteiro para os processos criados */
-Processo *criar_processos_aleatorios();
+Processo *criar_processos_aleatorios(void);
 
 /* Funcao para criar uma lista com quantidade máxima de processos aleatórios */
 /* Retorna uma lista de processos aleatorios */
