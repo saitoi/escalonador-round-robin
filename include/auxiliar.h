@@ -1,7 +1,7 @@
 #ifndef AUXILIAR_H
 #define AUXILIAR_H
 
-const static int MAX_LINHA 256
+const static int MAX_LINHA = 256;
 
 #include "processo.h"
 
