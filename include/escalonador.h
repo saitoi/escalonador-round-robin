@@ -1,7 +1,7 @@
 #ifndef ESCALONADOR_H
 #define ESCALONADOR_H
 
-const static int QUANTUM = 2; /* Quantum de tempo */
+static const int QUANTUM = 2; /* Quantum de tempo */
 
 /* Funcao que simula o escalonador */
 /* Recebe os processos a serem executados e as filas de alta prioridade, de baixa prioridade, de disco e de fita */
