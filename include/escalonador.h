@@ -1,8 +1,7 @@
 #ifndef ESCALONADOR_H
 #define ESCALONADOR_H
 
-// #define MAXIMO_PROCESSOS 4 /* Numero maximo de processos */
-#define QUANTUM 2 /* Quantum de tempo */
+const static int QUANTUM 2 /* Quantum de tempo */
 
 /* Funcao que simula o escalonador */
 /* Recebe os processos a serem executados e as filas de alta prioridade, de baixa prioridade, de disco e de fita */

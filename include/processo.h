@@ -1,15 +1,15 @@
 #ifndef PROCESSO_H
 #define PROCESSO_H
 
-#define TEMPO_MIN_CPU 5     /* Tempo minimo de CPU */
-#define TEMPO_MAX_CPU 10    /* Tempo maximo de CPU */
-#define TEMPO_MIN_CHEGADA 0 /* Tempo maximo de inicio */
-#define TEMPO_MAX_CHEGADA 4 /* Tempo maximo de inicio */
+static const int TEMPO_MIN_CPU = 2;         /* Tempo minimo de CPU */
+static const int TEMPO_MAX_CPU = 10;        /* Tempo maximo de CPU */
+static const int TEMPO_MIN_CHEGADA = 0;     /* Tempo maximo de inicio */
+static const int TEMPO_MAX_CHEGADA = 4;     /* Tempo maximo de inicio */
 
-#define MAXIMO_PROCESSOS 5      /* Numero maximo de processos */
-#define TEMPO_DISCO 2           /* Tempo de execucao de disco */
-#define TEMPO_FITA 3            /* Tempo de execucao de fita */
-#define QUANTIDADE_TIPOS_IO 2   /* Quantidade de tipos de E/S */
+static const int MAXIMO_PROCESSOS = 5;      /* Numero maximo de processos */
+static const int TEMPO_DISCO = 2;           /* Tempo de execucao de disco */
+static const int TEMPO_FITA = 3;            /* Tempo de execucao de fita */
+static const int QUANTIDADE_TIPOS_IO = 2;   /* Quantidade de tipos de E/S */
 
 /* Enumeracao contendo os tipos de E/S */
 typedef enum _TipoIO {
