@@ -1,6 +1,6 @@
-pid,instante_chegada,tempo_cpu,num_operacoes_io,tipo_io1,tempo_inicio_io1,tipo_io2,tempo_inicio_io2
-1,1,10,2,fita,1,fita,7
-2,1,5,0,,,,
-3,4,8,0,,,,
-4,2,10,0,,,,
-
+pid,instante_chegada,tempo_cpu,tempo_inicio_disco,tempo_inicio_fita
+0,3,3,-1,1
+1,4,3,1,2
+2,2,3,1,1
+3,1,5,-1,4
+4,4,7,5,-1
