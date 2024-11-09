@@ -7,6 +7,36 @@
 #include "../include/processo.h"
 #include "../include/interface.h"
 
+/* ************* PROCESSAMENTO DO MENU ************* */
+
+void processa_menu(ListaProcessos *lista_processos) {
+    int opcao = -1;
+
+    imprime_menu();
+    valida_entrada_inteiro("Escolha uma opção", &opcao, 1, 3);
+
+    switch (opcao) {
+        /* 1: Processos são extraídos de um CSV */
+        case 1:
+            *lista_processos = criar_lista_processos_csv("processos.csv");
+            break;
+        /* 2: Processos são gerados aleatoriamente */
+        case 2:
+            *lista_processos = criar_lista_processos_aleatorios();
+            break;
+        case 3:
+        /* 3: Usuário escolheu encerrar o programa */
+            printf("Encerrando o simulador. Até logo!\n");
+            return;
+        default:
+        /* Opção inválida, encerrando o programa.. */
+            printf("Opção inválida. Tente novamente.\n\n");
+            return;
+    }
+}
+
+/* ************* IMPRESSÃO DE INTERFACES BÁSICAS E INDEPENDENTES ************* */
+
 void imprime_menu(void) {
     printf("╔══════════════════════════════════════════════╗\n");
     printf("║      SIMULADOR ROUND ROBIN COM FEEDBACK      ║\n");
@@ -23,56 +53,20 @@ void imprime_instante(int tempo_atual) {
     printf("└────────────────────────────────────┘\n");
 }
 
-// TODO: Reduzir parâmetros dessa função
-void processa_menu(Fila *fila_alta_prioridade, Fila *fila_baixa_prioridade, Fila *fila_disco, Fila *fila_fita) {
-    ListaProcessos *lista = malloc(sizeof(ListaProcessos));
-    int opcao = -1;
-    if (lista == NULL) {
-        tratar_erro_alocacao("Erro na alocação de memória para lista de processos.\n");
-        exit(-1);
-    }
-
-
-    imprime_menu();
-
-    valida_entrada_inteiro("Escolha uma opção", &opcao, 1, 3);
-
-    switch (opcao) {
-        case 1:
-            *lista = criar_lista_processos_csv("processos.csv");
-            if (!lista->processos) {
-                tratar_erro_alocacao("Erro ao carregar processos do arquivo.\n");
-                exit(1);
-            }
-            break;
-        case 2:
-            *lista = criar_lista_processos_aleatorios();
-            if (!lista->processos) {
-                tratar_erro_alocacao("Erro ao alocar processos iniciais.\n");
-                exit(1);
-            }
-            break;
-        case 3:
-            printf("Encerrando o simulador. Até logo!\n");
-            return;
-        default:
-            printf("Opção inválida. Tente novamente.\n\n");
-            return;
-    }
-
-    escalonador(lista,
-                fila_alta_prioridade,
-                fila_baixa_prioridade,
-                fila_disco,
-                fila_fita);
+void imprime_fim_escalonador(void) {
+    printf("\n[+] Todos os processos foram finalizados com sucesso.\n");
+    printf("\n┌─────────────────────────────────────────┐\n");
+    printf("│           FIM DO ESCALONAMENTO          │\n");
+    printf("└─────────────────────────────────────────┘\n");
+    printf("\nTempos de turnaround dos processos:");
 }
 
-void imprime_todas_filas(Fila *fila_alta_prioridade, Fila *fila_baixa_prioridade, Fila *fila_disco, Fila *fila_fita) {
+void imprime_todas_filas(ListaFila *lista_filas) {
     printf("\n");
-    imprime_fila(" ALTA PRIORIDADE  ", fila_alta_prioridade);
-    imprime_fila(" BAIXA PRIORIDADE ", fila_baixa_prioridade);
-    imprime_fila(" DISCO ", fila_disco);
-    imprime_fila("️ FITA ", fila_fita);
+    imprime_fila(" ALTA PRIORIDADE  ", &lista_filas->filas[FILA_ALTA_PRIORIDADE]);
+    imprime_fila(" BAIXA PRIORIDADE ", &lista_filas->filas[FILA_BAIXA_PRIORIDADE]);
+    imprime_fila(" DISCO ", &lista_filas->filas[FILA_DISCO]);
+    imprime_fila("️ FITA ", &lista_filas->filas[FILA_FITA]);
 }
 
 void imprime_fila(const char *nome_fila, Fila *fila) {
@@ -97,10 +91,10 @@ void imprime_fila(const char *nome_fila, Fila *fila) {
     current = fila->inicio;
 
     // Imprime os processos na fila
-    printf("  │   P%d    ", current->processo.pid);
+    printf("  │   P%d    ", current->processo->pid);
     current = current->prox;
     while (current != NULL) {
-        printf("│   P%d    ", current->processo.pid);
+        printf("│   P%d    ", current->processo->pid);
         current = current->prox;
     }
     printf("│\n");
@@ -114,3 +108,4 @@ void imprime_fila(const char *nome_fila, Fila *fila) {
     }
     printf("┘\n");
 }
+

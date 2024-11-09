@@ -13,22 +13,14 @@ int main(void) {
 
     srand(time(NULL));
 
-    Fila fila_alta_prioridade, fila_baixa_prioridade, fila_disco, fila_fita;
+    ListaFila lista_filas;
+    ListaProcessos lista_processos;
 
-    inicializa_fila(&fila_alta_prioridade);
-    inicializa_fila(&fila_baixa_prioridade);
-    inicializa_fila(&fila_disco);
-    inicializa_fila(&fila_fita);
+    inicializa_lista_filas(&lista_filas);
 
-    processa_menu(&fila_alta_prioridade,
-                    &fila_baixa_prioridade,
-                    &fila_disco, 
-                    &fila_fita);
+    processa_menu(&lista_processos);
 
-    esvazia_fila(&fila_alta_prioridade);
-    esvazia_fila(&fila_baixa_prioridade);
-    esvazia_fila(&fila_disco);
-    esvazia_fila(&fila_fita);
+    escalonador(&lista_filas, &lista_processos);
 
     return 0;
 }

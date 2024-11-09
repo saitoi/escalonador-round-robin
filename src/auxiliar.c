@@ -5,7 +5,7 @@
 #include "../include/auxiliar.h"
 #include "../include/processo.h"
 
-void tratar_erro_alocacao(const char *mensagem) {
+void enviar_mensagem_erro(const char *mensagem) {
     fprintf(stderr, "%s\n", mensagem);
     exit(1);
 }
@@ -62,18 +62,27 @@ int parse_linha_csv(char *linha, Processo *processo) {
 
     memset(processo, 0, sizeof(Processo));
 
+    processo->tipo_io_atual = -1; // Inicializa sem operação de E/S atual
+    processo->num_operacoes_io = 0;
+
+    // Inicializa as operações de E/S
+    for (int i = 0; i < QUANTIDADE_TIPOS_IO; ++i) {
+        processo->operacoes_io[i].tipo_io = i;
+        processo->operacoes_io[i].presente = 0;
+        processo->operacoes_io[i].duracao_io = seleciona_tempo_io(i);
+        processo->operacoes_io[i].tempo_inicio = -1;
+        processo->operacoes_io[i].tempo_restante = processo->operacoes_io[i].duracao_io;
+    }
+
     token = strtok(linha, ",");
     while (token != NULL) {
         switch (idx) {
-            /* 0: Configura o PID */
             case 0:
                 processo->pid = atoi(token);
                 break;
-            /* 1: Inicializa o instante de chegada */
             case 1:
                 processo->instante_chegada = atoi(token);
                 break;
-            /* 2: Inicializa o instante de chegada */
             case 2:
                 processo->tempo_cpu = atoi(token);
                 processo->tempo_cpu_restante = processo->tempo_cpu;
@@ -81,84 +90,43 @@ int parse_linha_csv(char *linha, Processo *processo) {
                 processo->tempo_cpu_atual = 0;
                 processo->status_processo = PRONTO;
                 break;
-            /* 3: Aloca quantidade de operações de I/O */
             case 3:
-                processo->num_operacoes_io = atoi(token);
-                if (processo->num_operacoes_io > 0) {
-                    processo->operacoes_io = aloca_operacoes_io(processo->num_operacoes_io);
-                    if (!processo->operacoes_io) {
-                        tratar_erro_alocacao("Erro ao alocar operações de IO.\n");
-                        return 0;
-                    }
-                    processo->operacao_io_atual = 0;
+                // Tempo de início da operação de Disco
+                processo->operacoes_io[DISCO].tempo_inicio = atoi(token);
+                if (processo->operacoes_io[DISCO].tempo_inicio >= 0) {
+                    processo->num_operacoes_io++;
+                    processo->operacoes_io[DISCO].presente = 1;
                 }
                 break;
-            /* 4: Insere dados (Tipo, Duração, Tempo de Início e Restante) para cada tipo de I/O */
-            default:
-                if (processo->num_operacoes_io > 0) {
-                    int io_idx = (idx - 4) / 2;
-                    int io_field = (idx - 4) % 2;
-                    if (io_idx < processo->num_operacoes_io) {
-                        if (io_field == 0) {
-                            processo->operacoes_io[io_idx].tipo_io = atoi(token);
-                            processo->operacoes_io[io_idx].duracao_io = seleciona_tempo_io(processo->operacoes_io[io_idx].tipo_io);
-                            processo->operacoes_io[io_idx].tempo_restante = processo->operacoes_io[io_idx].duracao_io;
-                        } else {
-                            processo->operacoes_io[io_idx].tempo_inicio = atoi(token);
-                        }
-                    }
+            case 4:
+                // Tempo de início da operação de Fita
+                processo->operacoes_io[FITA].tempo_inicio = atoi(token);
+                if (processo->operacoes_io[FITA].tempo_inicio >= 0) {
+                    processo->num_operacoes_io++;
+                    processo->operacoes_io[FITA].presente = 1;
                 }
+                break;
+            default:
+                // Ignora tokens adicionais
                 break;
         }
         idx++;
         token = strtok(NULL, ",");
     }
 
-    if (idx < 4) {
-        return 0;
+    if (idx < 3) {
+        return 0; // Dados insuficientes
     }
 
     if (processo->num_operacoes_io > 0) {
-        quicksort(processo->operacoes_io, 0, processo->num_operacoes_io - 1);
+        int primeira_io = processo->tempo_cpu + 1;
+        for (int i = 0; i < QUANTIDADE_TIPOS_IO; ++i) {
+            if (processo->operacoes_io[i].presente && processo->operacoes_io[i].tempo_inicio < primeira_io) {
+                primeira_io = processo->operacoes_io[i].tempo_inicio;
+                processo->tipo_io_atual = i;
+            }
+        }
     }
 
     return 1;
-}
-
-void quicksort(OperacaoIO *operacoes_io, int inicio, int fim) {
-    int pos_pivo = 0;
-
-    if (fim > inicio) {
-        pos_pivo = particiona(operacoes_io, inicio, fim);
-        quicksort(operacoes_io, inicio, pos_pivo - 1);
-        quicksort(operacoes_io, pos_pivo + 1, fim);
-    }
-}
-
-int particiona(OperacaoIO *operacoes_io, int inicio, int fim) {
-    int pos_pivo = 0;
-    OperacaoIO pivo;
-    int i = inicio, j = fim;
-
-    pos_pivo = rand() % (fim + 1 - inicio) + inicio;
-    pivo = operacoes_io[pos_pivo];
-
-    operacoes_io[pos_pivo] = operacoes_io[inicio];
-    operacoes_io[inicio] = pivo;
-
-    while (i < j) {
-        while (i < fim && operacoes_io[i].tempo_inicio <= pivo.tempo_inicio) i++;
-        while (j > inicio && operacoes_io[j].tempo_inicio > pivo.tempo_inicio) j--;
-        if (i < j) troca(&operacoes_io[i], &operacoes_io[j]);
-    }
-
-    operacoes_io[inicio] = operacoes_io[j];
-    operacoes_io[j] = pivo;
-    return j;
-}
-
-void troca(OperacaoIO *a, OperacaoIO *b) {
-    OperacaoIO temp = *b;
-    *b = *a;
-    *a = temp;
 }
