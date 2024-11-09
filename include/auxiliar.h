@@ -1,7 +1,7 @@
 #ifndef AUXILIAR_H
 #define AUXILIAR_H
 
-const static int MAX_LINHA = 256;
+static const int MAX_LINHA = 256;
 
 #include "processo.h"
 
@@ -10,7 +10,7 @@ const static int MAX_LINHA = 256;
 /* Funcao para imprimir uma solicitacao ao usuario na tela e aguardar a resposta */
 /* Valida a entrada inserida pelo usuário */
 /* Não retorna valores */
-void tratar_erro_alocacao(const char *mensagem);
+void enviar_mensagem_erro(const char *mensagem);
 
 /* Funcao para imprimir uma solicitacao ao usuario na tela e aguardar a resposta */
 /* Valida a entrada inserida pelo usuário */
