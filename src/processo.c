@@ -208,7 +208,7 @@ int processo_finalizado(Processo *processo) {
 }
 
 int tempo_inicio_io(Processo *processo) {
-    if (processo->operacoes_io[processo->tipo_io_atual].presente == 1) {
+    if (processo->operacoes_io[processo->tipo_io_atual].presente == 1 && processo->num_operacoes_io != 0) {
         int tipo_io = processo->tipo_io_atual;
 
         int instante_inicio_io = processo->operacoes_io[tipo_io].tempo_inicio;
@@ -223,6 +223,7 @@ int tempo_inicio_io(Processo *processo) {
 }
 
 void executa_io(Processo *processo) {
+    /* Se processo acaba de entrar em executando, Status passa a ser IO */
     if (processo->status_processo == EXECUTANDO)
         processo->status_processo = ENTRADA_SAIDA;
     else {
