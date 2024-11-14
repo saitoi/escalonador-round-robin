@@ -1,67 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "../include/processo.h"
 #include "../include/auxiliar.h"
 
 /* ************* INICIALIZAÇÃO ************* */
-
-Processo *aloca_processo(void) {
-    Processo *processo = (Processo *) malloc(sizeof(Processo));
-    
-    if (processo == NULL) {
-        enviar_mensagem_erro("Erro na alocação de processo.\n");
-        return NULL;
-    }
-
-    return processo;
-}
-
-Processo *aloca_multiplos_processos(int num_processos) {
-    Processo *processos = (Processo *) calloc(num_processos, sizeof(Processo));
-
-    if (processos == NULL) {
-        enviar_mensagem_erro("Erro na alocação de múltiplos processos.\n");
-        return NULL;
-    }
-
-    return processos;
-}
-
-OperacaoIO *aloca_operacoes_io(int num_operacoes_io) {
-    OperacaoIO *operacoes_io = NULL;
-
-    operacoes_io = (OperacaoIO *) calloc(num_operacoes_io, sizeof(OperacaoIO));
-
-    if (operacoes_io == NULL) {
-        enviar_mensagem_erro("Erro na alocação de operação de IO");
-        return NULL;
-    }
-
-    return operacoes_io;
-}
-
-int seleciona_tempo_io(TipoIO tipo_io) {
-    switch (tipo_io) {
-        case DISCO:
-            return TEMPO_DISCO;
-        case FITA:
-            return TEMPO_FITA;
-        default:
-            return 0;
-    }
-}
-
-const char *seleciona_tipo_io(TipoIO tipo_io) {
-    switch (tipo_io) {
-        case DISCO:
-            return "Disco";
-        case FITA:
-            return "Fita";
-        default:
-            return "Desconhecido";
-    }
-}
 
 const char *seleciona_status_processo(StatusProcesso status_processo) {
     switch (status_processo) {
@@ -187,6 +131,101 @@ ListaProcessos criar_lista_processos_csv(const char *nome_arquivo) {
     lista_processos.quantidade = quantidade_processos_lidos;
 
     return lista_processos;
+}
+
+int parse_linha_csv(char *linha, Processo *processo) {
+    char *token;
+    int idx = 0;
+    int opcao_valida = 1;
+
+    trim_novalinha(linha);
+
+    if (strlen(linha) == 0)
+        return 0;
+
+    memset(processo, 0, sizeof(Processo));
+
+    processo->tipo_io_atual = -1; /* Inicializa sem operação de E/S atual */ 
+    processo->num_operacoes_io = 0;
+
+    for (int i = 0; i < QUANTIDADE_TIPOS_IO; ++i) {
+        processo->operacoes_io[i].tipo_io = i;
+        processo->operacoes_io[i].presente = 0;
+        processo->operacoes_io[i].duracao_io = seleciona_tempo_io(i);
+        processo->operacoes_io[i].tempo_inicio = -1;
+        processo->operacoes_io[i].tempo_restante = processo->operacoes_io[i].duracao_io;
+    }
+
+    token = strtok(linha, ",");
+    while (token != NULL && idx < 5) {
+        switch (idx) {
+            case 0:
+                processo->pid = converter_validar_int(token, 0, 10, &opcao_valida);
+                break;
+            case 1:
+                processo->instante_chegada = converter_validar_int(token, 0, TEMPO_MAX_CHEGADA, &opcao_valida);
+                break;
+            case 2:
+                processo->tempo_cpu = converter_validar_int(token, TEMPO_MIN_CPU, TEMPO_MAX_CPU, &opcao_valida);
+                processo->tempo_cpu_restante = processo->tempo_cpu;
+                processo->tempo_quantum_restante = 0;
+                processo->tempo_cpu_atual = 0;
+                processo->status_processo = PRONTO;
+                break;
+            case 3:
+                // Tempo de início da operação de Disco
+                processo->operacoes_io[DISCO].tempo_inicio = converter_validar_int(token, TEMPO_IO_PADRAO, processo->tempo_cpu, &opcao_valida);
+                if (processo->operacoes_io[DISCO].tempo_inicio >= 0) {
+                    processo->num_operacoes_io++;
+                    processo->operacoes_io[DISCO].presente = 1;
+                }
+                break;
+            case 4:
+                // Tempo de início da operação de Fita
+                processo->operacoes_io[FITA].tempo_inicio = converter_validar_int(token, TEMPO_IO_PADRAO, processo->tempo_cpu, &opcao_valida);
+                if (processo->operacoes_io[FITA].tempo_inicio >= 0) {
+                    processo->num_operacoes_io++;
+                    processo->operacoes_io[FITA].presente = 1;
+                }
+                break;
+            default:
+                // Ignora tokens adicionais
+                break;
+        }
+        idx++;
+        token = strtok(NULL, ",");
+    }
+
+    if (!opcao_valida) {
+        printf("%d", opcao_valida);
+        enviar_mensagem_erro("Leitura de variáveis inválida (CSV)");
+    }
+
+    if (idx < 3) {
+        return 0; // Dados insuficientes
+    }
+
+    if (processo->num_operacoes_io > 0) {
+        int primeira_io = processo->tempo_cpu + 1;
+        for (int i = 0; i < QUANTIDADE_TIPOS_IO; ++i) {
+            if (processo->operacoes_io[i].presente && processo->operacoes_io[i].tempo_inicio < primeira_io) {
+                primeira_io = processo->operacoes_io[i].tempo_inicio;
+                processo->tipo_io_atual = i;
+            }
+        }
+    }
+
+    return 1;
+}
+
+void trim_novalinha(char *str) {
+    size_t len = strlen(str);
+    if (len > 0 && (str[len-1] == '\n' || str[len-1] == '\r')) {
+        str[len-1] = '\0';
+        if (len > 1 && str[len-2] == '\r') {
+            str[len-2] = '\0';
+        }
+    }
 }
 
 /* ************* FUNÇÕES DO ESCALONADOR ************* */

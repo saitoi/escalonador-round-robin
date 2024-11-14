@@ -23,6 +23,11 @@ void imprime_menu(void);
 /* Nao retorna valores */
 void imprime_todas_filas(ListaFila *lista_filas);
 
+/* Função que imprime a informação dos processos */
+/* Recebe a lista de processos a serem impressos */
+/* Não retorna valores */
+void imprime_informacao_processos(ListaProcessos *lista_processos);
+
 /* Funcao que imprime interface gráfica da fila */
 /* Recebe a fila com os processos  */
 /* Nao retorna valores */

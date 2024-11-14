@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
+#include <ctype.h>
 
 #include "../include/auxiliar.h"
 #include "../include/processo.h"
@@ -10,12 +10,21 @@ void enviar_mensagem_erro(const char *mensagem) {
     exit(1);
 }
 
-void valida_entrada_inteiro(const char *mensagem, int *variavel, int min, int max) {
+void valida_entrada_inteiro(int valor, int min, int max, int *opcao_valida) {
+    if (valor < min || valor > max) {
+        printf("Entrada inválida, escolha um valor dentro do intervalo (%d - %d).\n", min, max);
+        *opcao_valida = 0;
+    } else {
+        *opcao_valida = 1;
+    }
+}
+
+void obter_entrada_inteiro(const char *mensagem, int *variavel, int min, int max) {
     int opcao_valida = 0;
     int valor;
     char ch;
 
-    while (!opcao_valida) { 
+    while (1) { 
         printf("%s (%d - %d): ", mensagem, min, max);
         if (scanf("%d", &valor) != 1) {
             printf("Caractere inválido. Tente novamente..\n");
@@ -23,30 +32,44 @@ void valida_entrada_inteiro(const char *mensagem, int *variavel, int min, int ma
             continue;
         }
 
-        if (valor < min || valor > max) {
-            printf("Entrada inválida, escolha um valor dentro do intervalo.\n");
-            while ((ch = getchar()) != '\n' && ch != EOF);
-            continue;
-        }
 
-        *variavel = valor;
-        opcao_valida = 1;
+        valida_entrada_inteiro(valor, min, max, &opcao_valida);
+
+        if (opcao_valida) {
+            *variavel = valor;
+            break;
+        }
+        else {
+            while ((ch = getchar()) != '\n' && ch != EOF);
+        }
      }
 }
 
-void valida_entrada_char(const char *mensagem, char *variavel) {
+int converter_validar_int(const char *str, int min, int max, int *opcao_valida) {
+    char *endptr;
+    long tmp = strtol(str, &endptr, 10);
+
+    if (*str != '\0' && *endptr == '\0' && tmp >= min && tmp <= max) {
+        return (int)tmp;
+    } else {
+        *opcao_valida = 0;
+        return -1;
+    }
+}
+
+
+void valida_entrada_char(void) {
     char ch;
     int opcao_valida = 0;
 
+    printf("Aqui estão os dados dos processos, deseja prosseguir? (s/N): ");
     while (!opcao_valida) { 
-        printf("%s (y/n): ", mensagem);
-        if (scanf(" %c", &ch) != 1 || (ch != 'y' && ch != 'n')) {
-            printf("Entrada inválida. Tente novamente.\n");
+        if (scanf(" %c", &ch) != 1 || (tolower(ch) != 's' && tolower(ch) != 'n')) {
+            printf("Entrada inválida. Tente novamente.. (s/N):");
             while ((ch = getchar()) != '\n' && ch != EOF);  // Limpa buffer de entrada
             continue;
         }
         
-        *variavel = ch;
         opcao_valida = 1;
     }
 }
@@ -55,78 +78,24 @@ int gerar_dado_aleatorio(int min, int max) {
     return min + rand() % (max - min + 1);
 }
 
-// TODO: Analisar essa função
-int parse_linha_csv(char *linha, Processo *processo) {
-    char *token;
-    int idx = 0;
-
-    memset(processo, 0, sizeof(Processo));
-
-    processo->tipo_io_atual = -1; // Inicializa sem operação de E/S atual
-    processo->num_operacoes_io = 0;
-
-    // Inicializa as operações de E/S
-    for (int i = 0; i < QUANTIDADE_TIPOS_IO; ++i) {
-        processo->operacoes_io[i].tipo_io = i;
-        processo->operacoes_io[i].presente = 0;
-        processo->operacoes_io[i].duracao_io = seleciona_tempo_io(i);
-        processo->operacoes_io[i].tempo_inicio = -1;
-        processo->operacoes_io[i].tempo_restante = processo->operacoes_io[i].duracao_io;
+int seleciona_tempo_io(TipoIO tipo_io) {
+    switch (tipo_io) {
+        case DISCO:
+            return TEMPO_DISCO;
+        case FITA:
+            return TEMPO_FITA;
+        default:
+            return 0;
     }
+}
 
-    token = strtok(linha, ",");
-    while (token != NULL) {
-        switch (idx) {
-            case 0:
-                processo->pid = atoi(token);
-                break;
-            case 1:
-                processo->instante_chegada = atoi(token);
-                break;
-            case 2:
-                processo->tempo_cpu = atoi(token);
-                processo->tempo_cpu_restante = processo->tempo_cpu;
-                processo->tempo_quantum_restante = 0;
-                processo->tempo_cpu_atual = 0;
-                processo->status_processo = PRONTO;
-                break;
-            case 3:
-                // Tempo de início da operação de Disco
-                processo->operacoes_io[DISCO].tempo_inicio = atoi(token);
-                if (processo->operacoes_io[DISCO].tempo_inicio >= 0) {
-                    processo->num_operacoes_io++;
-                    processo->operacoes_io[DISCO].presente = 1;
-                }
-                break;
-            case 4:
-                // Tempo de início da operação de Fita
-                processo->operacoes_io[FITA].tempo_inicio = atoi(token);
-                if (processo->operacoes_io[FITA].tempo_inicio >= 0) {
-                    processo->num_operacoes_io++;
-                    processo->operacoes_io[FITA].presente = 1;
-                }
-                break;
-            default:
-                // Ignora tokens adicionais
-                break;
-        }
-        idx++;
-        token = strtok(NULL, ",");
+const char *seleciona_tipo_io(TipoIO tipo_io) {
+    switch (tipo_io) {
+        case DISCO:
+            return "Disco";
+        case FITA:
+            return "Fita";
+        default:
+            return "Desconhecido";
     }
-
-    if (idx < 3) {
-        return 0; // Dados insuficientes
-    }
-
-    if (processo->num_operacoes_io > 0) {
-        int primeira_io = processo->tempo_cpu + 1;
-        for (int i = 0; i < QUANTIDADE_TIPOS_IO; ++i) {
-            if (processo->operacoes_io[i].presente && processo->operacoes_io[i].tempo_inicio < primeira_io) {
-                primeira_io = processo->operacoes_io[i].tempo_inicio;
-                processo->tipo_io_atual = i;
-            }
-        }
-    }
-
-    return 1;
 }

@@ -15,15 +15,6 @@ void processa_fila_io(Fila *fila_io, Fila *fila_destino, const char *prioridade,
 /* Não retorna valores */
 void escalonador(ListaFila *lista_filas, ListaProcessos *lista_processos);
 
-/* Função que imprime a informação dos processos */
-/* Recebe a lista de processos a serem impressos */
-/* Não retorna valores */
-void imprime_informacao_processos(ListaProcessos *lista_processos);
-
-/* Função que solicita confirmação do usuário antes de prosseguir o programa */
-/* Não retorna valores */
-void confirmacao_usuario(void);
-
 /* Função que verifica se todas as filas estão vazias */
 /* Recebe a lista de todas as filas */
 /* Retorna 1 caso todas as filas estejam vazias, 0 caso contrário */

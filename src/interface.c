@@ -13,7 +13,7 @@ void processa_menu(ListaProcessos *lista_processos) {
     int opcao = -1;
 
     imprime_menu();
-    valida_entrada_inteiro("Escolha uma opção", &opcao, 1, 3);
+    obter_entrada_inteiro("Escolha uma opção", &opcao, 1, 3);
 
     switch (opcao) {
         /* 1: Processos são extraídos de um CSV */
@@ -67,6 +67,41 @@ void imprime_todas_filas(ListaFila *lista_filas) {
     imprime_fila(" BAIXA PRIORIDADE ", &lista_filas->filas[FILA_BAIXA_PRIORIDADE]);
     imprime_fila(" DISCO ", &lista_filas->filas[FILA_DISCO]);
     imprime_fila("️ FITA ", &lista_filas->filas[FILA_FITA]);
+}
+
+void imprime_informacao_processos(ListaProcessos *lista_processos) {
+    if (lista_processos->quantidade > 0) {
+        printf("\n═══════════════════════════════════════ PROCESSOS ═══════════════════════════════════════\n");
+        printf(" PID\tTempo de Início\t\tTempo de Serviço\tE/S (Tempo de Inicio)\t\t\n");
+        printf("─────────────────────────────────────────────────────────────────────────────────────────\n");
+
+        for (int i = 0; i < lista_processos->quantidade; i++) {
+            printf(" P%d\t\t%d\t\t\t%d\t\t", 
+                lista_processos->processos[i].pid, 
+                lista_processos->processos[i].instante_chegada,
+                lista_processos->processos[i].tempo_cpu);
+
+            if (lista_processos->processos[i].num_operacoes_io == 0) {
+                printf("Nenhuma operacao de E/S.");
+            } else {
+                for (int j = 0; j < QUANTIDADE_TIPOS_IO; j++) {
+                    int tempo_inicio_io = lista_processos->processos[i].operacoes_io[j].tempo_inicio;
+                    if (tempo_inicio_io == -1)
+                        continue;
+                    printf("%s (%d)", seleciona_tipo_io(lista_processos->processos[i].operacoes_io[j].tipo_io), tempo_inicio_io);
+
+                    if (j < lista_processos->processos[i].num_operacoes_io - 1) {
+                        printf(", ");
+                    }
+                }
+            }
+            printf("\n");
+        }
+
+        printf("═════════════════════════════════════════════════════════════════════════════════════════\n");
+    } else {
+        printf("Sem processos.\n");
+    }
 }
 
 void imprime_fila(const char *nome_fila, Fila *fila) {

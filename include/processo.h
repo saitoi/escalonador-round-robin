@@ -1,16 +1,16 @@
 #ifndef PROCESSO_H
 #define PROCESSO_H
 
+#define MAXIMO_PROCESSOS 5                  /* Numero maximo de processos */
 static const int TEMPO_MIN_CPU = 3;         /* Tempo minimo de CPU */
 static const int TEMPO_MAX_CPU = 10;        /* Tempo maximo de CPU */
 static const int TEMPO_MAX_CHEGADA = 4;     /* Tempo maximo de inicio */
 
-static const int MAXIMO_PROCESSOS = 5;      /* Numero maximo de processos */
 static const int TEMPO_DISCO = 2;           /* Tempo de execucao de disco */
 static const int TEMPO_FITA = 3;            /* Tempo de execucao de fita */
 static const int TEMPO_IO_PADRAO = -1;      /* Tempo atribuído ao IO caso não existir */
 
-static const int QUANTUM = 2;               /* Quantum de tempo definido externamente */
+static const int QUANTUM = 3;               /* Quantum de tempo definido externamente */
 
 /* Enumeracao contendo os status do processo */
 typedef enum _StatusProcesso {
@@ -57,30 +57,8 @@ typedef struct _ListaProcessos {
     int quantidade;                         /* Quantidade de processos ativos */
 } ListaProcessos;
 
-/* Funcao para alocar o espaco de um processo */
-/* Nao recebe parametros */
-/* Retorna um ponteiro para o processo alocado */
-Processo *aloca_processo(void);
-
-/* Funcao para alocar o espaco de um vetor de processos */
-/* Recebe a quantidade de processos a serem alocados */
-/* Retorna um ponteiro para o vetor de processos alocado */
-Processo *aloca_multiplos_processos(int num_processos);
-
-/* Funcao para alocar o espaco de um vetor de operacoes de E/S */
-/* Recebe a quantidade de operacoes de E/S a serem alocadas */
-/* Retorna um ponteiro para o vetor de operacoes de E/S alocado */
-OperacaoIO *aloca_operacoes_io(int num_operacoes_io);
-
-/* Funcao para selecionar o tempo de uma operacao de E/S */
-/* Recebe o tipo de E/S */
-/* Retorna o tempo da operacao de E/S */
-int seleciona_tempo_io(TipoIO tipo_io);
-
-/* Funcao para selecionar o tipo de uma operacao de E/S */
-/* Recebe o tipo de E/S */
-/* Retorna uma string contendo o tipo de E/S */
-const char *seleciona_tipo_io(TipoIO tipo_io);
+/* Funcao para imprimir uma solicitacao ao usuario na tela e aguardar a resposta */
+void trim_novalinha(char *str);
 
 /* Funcao para selecionar o status de um processo */
 /* Recebe o status do processo */
@@ -100,6 +78,11 @@ Processo criar_processo_aleatorio(void);
 /* Recebe o nome do arquivo para leitura dos dados */
 /* Retorna um ponteiro para os processos criados */
 ListaProcessos criar_lista_processos_csv(const char *nome_arquivo);
+
+/* Recebe o nome do arquivo para leitura dos dados */
+/* Atualiza os dados do processo com os extraídos do CSV */
+/* Retorna 1 caso a leitura foi um sucesso e 0 caso contrário */
+int parse_linha_csv(char *linha, Processo *processo);
 
 /* Funcao para executar um processo */
 /* Recebe o processo a ser executado */
