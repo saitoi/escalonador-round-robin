@@ -22,7 +22,10 @@ void processa_fila_prioridade(Fila *fila_prioridade, ListaFila *lista_filas, Lis
         envia_para_io(processo_atual, lista_filas);
     } 
     else if (tempo_quantum_completo(processo_atual)) {
-        printf(" P%d sofreu preempcao, vai pra fila de baixa prioridade.\n", processo_atual->pid);
+        if (fila_prioridade == &lista_filas->filas[FILA_BAIXA_PRIORIDADE])
+            printf(" P%d finalizou o quantum, retorna pro início da fila.\n", processo_atual->pid);
+        else
+            printf(" P%d sofreu preempcao, vai pra fila de baixa prioridade.\n", processo_atual->pid);
         enfileira(&lista_filas->filas[FILA_BAIXA_PRIORIDADE], processo_atual);
     } 
     else {
