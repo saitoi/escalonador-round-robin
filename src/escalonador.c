@@ -6,7 +6,7 @@
 #include "../include/processo.h"
 #include "../include/escalonador.h"
 #include "../include/interface.h"
-#include "../include/auxiliar.h"
+#include "../include/utilitarios.h"
 
 void processa_fila_prioridade(Fila *fila_prioridade, ListaFila *lista_filas, ListaProcessos *lista_processos, int instante_atual, int *processos_finalizados) {
     Processo *processo_atual = desenfileira(fila_prioridade);

@@ -3,7 +3,7 @@
 #include <string.h>
 
 #include "../include/processo.h"
-#include "../include/auxiliar.h"
+#include "../include/utilitarios.h"
 
 /* ************* INICIALIZAÇÃO ************* */
 

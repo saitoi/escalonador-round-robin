@@ -2,7 +2,7 @@
 #include <stdlib.h>
 
 #include "../include/fila.h"
-#include "../include/auxiliar.h"
+#include "../include/utilitarios.h"
 
 /* ************* INICIALIZAÇÃO ************* */
 

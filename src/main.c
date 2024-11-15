@@ -7,7 +7,7 @@
 #include "../include/fila.h"
 #include "../include/escalonador.h"
 #include "../include/interface.h"
-#include "../include/auxiliar.h"
+#include "../include/utilitarios.h"
 
 int main(void) {
 
