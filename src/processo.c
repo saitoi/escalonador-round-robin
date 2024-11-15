@@ -174,7 +174,7 @@ int parse_linha_csv(char *linha, Processo *processo) {
                 break;
             case 3:
                 // Tempo de início da operação de Disco
-                processo->operacoes_io[DISCO].tempo_inicio = converter_validar_int(token, TEMPO_IO_PADRAO, processo->tempo_cpu, &opcao_valida);
+                processo->operacoes_io[DISCO].tempo_inicio = converter_validar_int(token, TEMPO_IO_PADRAO, processo->tempo_cpu - 1, &opcao_valida);
                 if (processo->operacoes_io[DISCO].tempo_inicio >= 0) {
                     processo->num_operacoes_io++;
                     processo->operacoes_io[DISCO].presente = 1;
@@ -182,7 +182,7 @@ int parse_linha_csv(char *linha, Processo *processo) {
                 break;
             case 4:
                 // Tempo de início da operação de Fita
-                processo->operacoes_io[FITA].tempo_inicio = converter_validar_int(token, TEMPO_IO_PADRAO, processo->tempo_cpu, &opcao_valida);
+                processo->operacoes_io[FITA].tempo_inicio = converter_validar_int(token, TEMPO_IO_PADRAO, processo->tempo_cpu - 1, &opcao_valida);
                 if (processo->operacoes_io[FITA].tempo_inicio >= 0) {
                     processo->num_operacoes_io++;
                     processo->operacoes_io[FITA].presente = 1;

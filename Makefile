@@ -1,16 +1,15 @@
 CC = gcc
 CFLAGS = -Wall -Werror -pedantic
-SRCS = src/main.c src/escalonador.c src/processo.c src/fila.c src/interface.c src/auxiliar.c
-OBJ = main
+SRCS = src/main.c src/escalonador.c src/processo.c src/fila.c src/interface.c src/utilitarios.c
+TARGET = main
 
 .PHONY: all clean
 
-all: $(OBJ)
-	./$(OBJ)
+all: $(TARGET)
+	./$(TARGET)
 
-$(OBJ): $(SRCS)
-	$(CC) $(CFLAGS) -o $(OBJ) $(SRCS)
+$(TARGET): $(SRCS)
+	$(CC) $(CFLAGS) -o $(TARGET) $(SRCS)
 
 clean:
-	rm -f $(OBJ)
-
+	rm -f $(TARGET)
