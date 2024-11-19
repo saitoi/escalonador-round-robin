@@ -6,6 +6,16 @@
 
 /* ************* INICIALIZAÇÃO ************* */
 
+void inicializa_quantum(Fila *fila) {
+    if (!fila_vazia(fila)) {
+        No *aux = fila->inicio;
+        while (aux != NULL) {
+            aux->processo->tempo_quantum_restante = 0;
+            aux = aux->prox;
+        }
+    }
+}
+
 void inicializa_fila(Fila *fila) {
     fila->inicio = fila->fim = NULL;
 }
@@ -14,27 +24,6 @@ void inicializa_lista_filas(ListaFila *lista) {
     for (int i = 0; i < NUM_FILAS; ++i) {
         inicializa_fila(&lista->filas[i]);
     }
-}
-
-Fila *aloca_fila(void) {
-    Fila *fila = NULL;
-
-    fila = (Fila *) malloc(sizeof(Fila));
-
-    if (!fila) {
-        enviar_mensagem_erro("Erro na alocação da fila.\n");
-        return NULL;
-    }
-
-    return fila;
-}
-
-int fila_vazia(Fila *fila) {
-    if (fila->inicio == NULL) {
-        fila->fim = NULL;
-        return 1;
-    }
-    return 0;
 }
 
 No *aloca_no(void) {
@@ -47,6 +36,18 @@ No *aloca_no(void) {
 
     return no;
 }
+
+/* ************* VERIFICAÇÕES ************* */
+
+int fila_vazia(Fila *fila) {
+    if (fila->inicio == NULL) {
+        fila->fim = NULL;
+        return 1;
+    }
+    return 0;
+}
+
+/* ************* OPERAÇÕES ************* */
 
 void enfileira(Fila *fila, Processo *processo) {
     No *novo = aloca_no();
@@ -86,7 +87,6 @@ void enfileira_inicio(Fila *fila, Processo *processo) {
     }
 }
 
-
 Processo *desenfileira(Fila *fila) {
     No *aux = NULL;
     Processo *processo;
@@ -97,24 +97,13 @@ Processo *desenfileira(Fila *fila) {
     }
 
     aux = fila->inicio;
-    processo = aux->processo; // Obtendo o ponteiro para o processo
+    processo = aux->processo;
     fila->inicio = aux->prox;
 
-    if (fila->inicio == NULL) // Se a fila ficou vazia após desenfileirar
+    if (fila->inicio == NULL)
         fila->fim = NULL;
 
-    free(aux); // Liberando o nó, mas não o processo
+    free(aux);
 
-    return processo; // Retornando o ponteiro para o processo original
-}
-
-void esvazia_fila(Fila *fila) {
-    No *aux = NULL;
-
-    while (fila->inicio != NULL) {
-        aux = fila->inicio;
-        fila->inicio = fila->inicio->prox;
-        free(aux);
-    }
-    fila->fim = NULL;
+    return processo;
 }

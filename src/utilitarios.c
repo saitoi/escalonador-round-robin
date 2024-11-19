@@ -10,39 +10,24 @@ void enviar_mensagem_erro(const char *mensagem) {
     exit(1);
 }
 
-void valida_entrada_inteiro(int valor, int min, int max, int *opcao_valida) {
-    if (valor < min || valor > max) {
-        printf("Entrada inválida, escolha um valor dentro do intervalo (%d - %d).\n", min, max);
-        *opcao_valida = 0;
-    } else {
-        *opcao_valida = 1;
+void obter_entrada_caractere(const char *mensagem, char *variavel, char min, char max) {
+    char entrada;
+    int valido = 0;
+
+    while (!valido) {
+        printf("%s (%c - %c): ", mensagem, min, max);
+        
+        entrada = getchar(); // Lê o caractere
+        while (getchar() != '\n'); // Limpa o buffer
+
+        // Verifica se o caractere está no intervalo permitido
+        if (entrada >= min && entrada <= max) {
+            *variavel = entrada;
+            valido = 1;
+        } else {
+            printf("Caractere inválido. Tente novamente.\n");
+        }
     }
-}
-
-void obter_entrada_inteiro(const char *mensagem, int *variavel, int min, int max) {
-    int opcao_valida = 0;
-    int valor;
-    char ch;
-
-    while (1) { 
-        printf("%s (%d - %d): ", mensagem, min, max);
-        if (scanf("%d", &valor) != 1) {
-            printf("Caractere inválido. Tente novamente..\n");
-            while ((ch = getchar()) != '\n' && ch != EOF);
-            continue;
-        }
-
-
-        valida_entrada_inteiro(valor, min, max, &opcao_valida);
-
-        if (opcao_valida) {
-            *variavel = valor;
-            break;
-        }
-        else {
-            while ((ch = getchar()) != '\n' && ch != EOF);
-        }
-     }
 }
 
 int converter_validar_int(const char *str, int min, int max, int *opcao_valida) {
@@ -57,7 +42,6 @@ int converter_validar_int(const char *str, int min, int max, int *opcao_valida) 
     }
 }
 
-
 void valida_entrada_char(void) {
     char ch;
     int opcao_valida = 0;
@@ -70,6 +54,11 @@ void valida_entrada_char(void) {
             continue;
         }
         
+        if (tolower(ch) == 'n') {
+            printf("Encerrando o programa..");
+            exit(0);
+        }
+
         opcao_valida = 1;
     }
 }

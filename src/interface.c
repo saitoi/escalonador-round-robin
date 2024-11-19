@@ -10,70 +10,70 @@
 /* ************* PROCESSAMENTO DO MENU ************* */
 
 void processa_menu(ListaProcessos *lista_processos) {
-    int opcao = -1;
+    char opcao;
 
     imprime_menu();
-    obter_entrada_inteiro("Escolha uma opção", &opcao, 1, 3);
+    obter_entrada_caractere("Escolha uma opcao", &opcao, '1', '3');
 
     switch (opcao) {
-        /* 1: Processos são extraídos de um CSV */
-        case 1:
+        /* 1: Processos sao extraidos de um CSV */
+        case '1':
             *lista_processos = criar_lista_processos_csv("processos.csv");
             break;
-        /* 2: Processos são gerados aleatoriamente */
-        case 2:
+        /* 2: Processos sao gerados aleatoriamente */
+        case '2':
             *lista_processos = criar_lista_processos_aleatorios();
             break;
-        case 3:
-        /* 3: Usuário escolheu encerrar o programa */
-            printf("Encerrando o simulador. Até logo!\n");
+        case '3':
+        /* 3: Usuario escolheu encerrar o programa */
+            printf("Encerrando o simulador. Ate logo!\n");
             return;
         default:
-        /* Opção inválida, encerrando o programa.. */
-            printf("Opção inválida. Tente novamente.\n\n");
+        /* Opcao invalida, encerrando o programa.. */
+            printf("Opcao invalida. Tente novamente.\n\n");
             return;
     }
 }
 
-/* ************* IMPRESSÃO DE INTERFACES BÁSICAS E INDEPENDENTES ************* */
+/* ************* IMPRESSAO DE INTERFACES BASICAS E INDEPENDENTES ************* */
 
 void imprime_menu(void) {
-    printf("╔══════════════════════════════════════════════╗\n");
-    printf("║      SIMULADOR ROUND ROBIN COM FEEDBACK      ║\n");
-    printf("╚══════════════════════════════════════════════╝\n");
-    printf("│  1. Carregar dados de arquivo externo (CSV). │\n");
-    printf("│  2. Gerar dados aleatoriamente.              │\n");
-    printf("│  3. Sair.                                    │\n");
-    printf("└──────────────────────────────────────────────┘\n");
+    printf("+----------------------------------------------+\n");
+    printf("|      SIMULADOR ROUND ROBIN COM FEEDBACK      |\n");
+    printf("+----------------------------------------------+\n");
+    printf("|  1. Carregar dados de arquivo externo (CSV). |\n");
+    printf("|  2. Gerar dados aleatoriamente.              |\n");
+    printf("|  3. Sair.                                    |\n");
+    printf("+----------------------------------------------+\n");
 }
 
 void imprime_instante(int tempo_atual) {
-    printf("\n┌────────────────────────────────────┐\n");
-    printf("│         >>> INSTANTE %02d <<<        │\n", tempo_atual);
-    printf("└────────────────────────────────────┘\n");
+    printf("\n+------------------------------------+\n");
+    printf("|         >>> INSTANTE %02d <<<        |\n", tempo_atual);
+    printf("+------------------------------------+\n");
 }
 
 void imprime_fim_escalonador(void) {
     printf("\n[+] Todos os processos foram finalizados com sucesso.\n");
-    printf("\n┌─────────────────────────────────────────┐\n");
-    printf("│           FIM DO ESCALONAMENTO          │\n");
-    printf("└─────────────────────────────────────────┘\n");
+    printf("\n+-----------------------------------------+\n");
+    printf("|           FIM DO ESCALONAMENTO          |\n");
+    printf("+-----------------------------------------+\n");
     printf("\nTempos de turnaround dos processos:");
 }
 
 void imprime_todas_filas(ListaFila *lista_filas) {
     printf("\n");
-    imprime_fila(" ALTA PRIORIDADE  ", &lista_filas->filas[FILA_ALTA_PRIORIDADE]);
-    imprime_fila(" BAIXA PRIORIDADE ", &lista_filas->filas[FILA_BAIXA_PRIORIDADE]);
-    imprime_fila(" DISCO ", &lista_filas->filas[FILA_DISCO]);
-    imprime_fila("️ FITA ", &lista_filas->filas[FILA_FITA]);
+    imprime_fila("ALTA PRIORIDADE  ", &lista_filas->filas[FILA_ALTA_PRIORIDADE]);
+    imprime_fila("BAIXA PRIORIDADE ", &lista_filas->filas[FILA_BAIXA_PRIORIDADE]);
+    imprime_fila("DISCO ", &lista_filas->filas[FILA_DISCO]);
+    imprime_fila("FITA ", &lista_filas->filas[FILA_FITA]);
 }
 
-void imprime_informacao_processos(ListaProcessos *lista_processos) {
+void imprime_tabela_processos(ListaProcessos *lista_processos) {
     if (lista_processos->quantidade > 0) {
-        printf("\n═══════════════════════════════════════ PROCESSOS ═══════════════════════════════════════\n");
-        printf(" PID\tTempo de Início\t\tTempo de Serviço\tE/S (Tempo de Inicio)\t\t\n");
-        printf("─────────────────────────────────────────────────────────────────────────────────────────\n");
+        printf("\n================================ PROCESSOS ======================================\n");
+        printf(" PID\tTempo de Inicio\t\tTempo de Servico\tE/S (Tempo de Inicio)\n");
+        printf("---------------------------------------------------------------------------------\n");
 
         for (int i = 0; i < lista_processos->quantidade; i++) {
             printf(" P%d\t\t%d\t\t\t%d\t\t", 
@@ -98,10 +98,32 @@ void imprime_informacao_processos(ListaProcessos *lista_processos) {
             printf("\n");
         }
 
-        printf("═════════════════════════════════════════════════════════════════════════════════════════\n");
+        printf("=================================================================================\n");
     } else {
         printf("Sem processos.\n");
     }
+}
+
+void imprime_turnaround_processos(ListaProcessos lista_processos) {
+    float turnaround_medio = 0,
+          tempo_espera_medio = 0;
+
+    printf("\n======================== TURNAROUND ============================\n");
+    printf(" PID\tTempo de Turnaround\tTempo de Espera\n");
+    printf("----------------------------------------------------------------\n");
+
+    for (int i = 0; i < lista_processos.quantidade; i++) {
+        printf(" P%d\t\t%d u.t.\t\t %d u.t.\n", 
+            lista_processos.processos[i].pid, 
+            lista_processos.processos[i].tempo_turnaround, 
+            lista_processos.processos[i].tempo_turnaround - lista_processos.processos[i].tempo_cpu);
+        turnaround_medio += (float) lista_processos.processos[i].tempo_turnaround;
+        tempo_espera_medio += (float) lista_processos.processos[i].tempo_turnaround - lista_processos.processos[i].tempo_cpu;
+    }
+
+    printf("================================================================\n");
+    printf(" Turnaround medio: %.2f u.t.\n", turnaround_medio / lista_processos.quantidade);
+    printf(" Tempo de espera medio: %.2f u.t.\n", tempo_espera_medio / lista_processos.quantidade);
 }
 
 void imprime_fila(const char *nome_fila, Fila *fila) {
@@ -115,32 +137,31 @@ void imprime_fila(const char *nome_fila, Fila *fila) {
     No *current = fila->inicio;
 
     // Imprime o topo da fila
-    printf("  ┌─────────");
+    printf("  +---------");
     while (current->prox != NULL) {
-        printf("┬─────────");
+        printf("+---------");
         current = current->prox;
     }
-    printf("┐\n");
+    printf("+\n");
 
-    // Reseta o ponteiro para o início da fila
+    // Reseta o ponteiro para o inicio da fila
     current = fila->inicio;
 
     // Imprime os processos na fila
-    printf("  │   P%d    ", current->processo->pid);
+    printf("  |   P%d    ", current->processo->pid);
     current = current->prox;
     while (current != NULL) {
-        printf("│   P%d    ", current->processo->pid);
+        printf("|   P%d    ", current->processo->pid);
         current = current->prox;
     }
-    printf("│\n");
+    printf("|\n");
 
     // Imprime a base da fila
-    printf("  └─────────");
+    printf("  +---------");
     current = fila->inicio;
     while (current->prox != NULL) {
-        printf("┴─────────");
+        printf("+---------");
         current = current->prox;
     }
-    printf("┘\n");
+    printf("+\n");
 }
-

@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <time.h>
 
-// TODO: Distribuir melhor as funções, evitar chamar todos os headers
 #include "../include/processo.h"
 #include "../include/fila.h"
 #include "../include/escalonador.h"

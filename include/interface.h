@@ -1,8 +1,7 @@
 #ifndef INTERFACE_H
 #define INTERFACE_H
 
-/* Funcao que simula o escalonador */
-/* Recebe os processos a serem executados e as filas de alta prioridade, de baixa prioridade, de disco e de fita */
+/* Funcao para atualização da lista de processos baseado na escolha do usuário */
 /* Nao retorna valores */
 void processa_menu(ListaProcessos *lista_processos);
 
@@ -18,18 +17,19 @@ void imprime_fim_escalonador(void);
 /* Nao retorna valores */
 void imprime_menu(void);
 
-/* Funcao que imprime interface gráfica da fila */
-/* Recebe a fila com os processos  */
+/* Função que imprime a informação dos processos */
+/* Não retorna valores */
+void imprime_tabela_processos(ListaProcessos *lista_processos);
+
+/* Função que imprime a turnaround dos processos */
+/* Não retorna valores */
+void imprime_turnaround_processos(ListaProcessos lista_processos);
+
+/* Funcao que imprime todas as filas */
 /* Nao retorna valores */
 void imprime_todas_filas(ListaFila *lista_filas);
 
-/* Função que imprime a informação dos processos */
-/* Recebe a lista de processos a serem impressos */
-/* Não retorna valores */
-void imprime_informacao_processos(ListaProcessos *lista_processos);
-
 /* Funcao que imprime interface gráfica da fila */
-/* Recebe a fila com os processos  */
 /* Nao retorna valores */
 void imprime_fila(const char *nome_fila, Fila *fila);
 

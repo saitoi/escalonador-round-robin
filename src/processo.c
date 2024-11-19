@@ -5,21 +5,6 @@
 #include "../include/processo.h"
 #include "../include/utilitarios.h"
 
-/* ************* INICIALIZAÇÃO ************* */
-
-const char *seleciona_status_processo(StatusProcesso status_processo) {
-    switch (status_processo) {
-        case PRONTO:
-            return "PRONTO";
-        case EXECUTANDO:
-            return "EXECUTANDO";
-        case ENTRADA_SAIDA:
-            return "ENTRADA E/OU SAIDA";
-        default:
-            return "DESCONHECIDO";
-    }
-}
-
 /* ************* CRIAÇÃO DE LISTA DE PROCESSOS ALEATÓRIOS ************* */
 
 ListaProcessos criar_lista_processos_aleatorios(void) {
@@ -38,13 +23,11 @@ Processo criar_processo_aleatorio(void) {
     int i;
     Processo processo;
 
-    // Inicialização dos atributos do processo
     processo.instante_chegada = gerar_dado_aleatorio(0, TEMPO_MAX_CHEGADA);
     processo.tempo_cpu = gerar_dado_aleatorio(TEMPO_MIN_CPU, TEMPO_MAX_CPU);
     processo.tempo_cpu_restante = processo.tempo_cpu;
     processo.tempo_quantum_restante = 0;
     processo.tempo_cpu_atual = 0;
-    processo.status_processo = PRONTO;
     processo.tipo_io_atual = -1; // Indica que não há operação de E/S atual
     processo.num_operacoes_io = 0; // Inicializa o contador de operações de E/S
 
@@ -55,13 +38,11 @@ Processo criar_processo_aleatorio(void) {
         processo.operacoes_io[i].tipo_io = i; // 0 para DISCO, 1 para FITA
         processo.operacoes_io[i].presente = 0;
         processo.operacoes_io[i].tempo_inicio = -1;
-        processo.operacoes_io[i].duracao_io = 0;
         processo.operacoes_io[i].tempo_restante = 0;
 
         /* Decide se o processo terá E/S ou não */
         int precisa_io = gerar_dado_aleatorio(0, 1);
         if (precisa_io) {   // E/S Presente
-            processo.operacoes_io[i].duracao_io = seleciona_tempo_io(processo.operacoes_io[i].tipo_io);
             
             // Gera um tempo de início que não coincide com o primeiro tempo de E/S
             int tempo_inicio;
@@ -70,7 +51,7 @@ Processo criar_processo_aleatorio(void) {
             } while (tempo_inicio == tempo_io_primeiro);
 
             processo.operacoes_io[i].tempo_inicio = tempo_inicio;
-            processo.operacoes_io[i].tempo_restante = processo.operacoes_io[i].duracao_io;
+            processo.operacoes_io[i].tempo_restante = seleciona_tempo_io(processo.operacoes_io[i].tipo_io);
             processo.operacoes_io[i].presente = 1;
             processo.num_operacoes_io++;
 
@@ -92,9 +73,9 @@ Processo criar_processo_aleatorio(void) {
 
     return processo;
 }
-            
+
 /* ************* CRIAÇÃO DE LISTA DE PROCESSOS CSV ************* */
-            
+
 ListaProcessos criar_lista_processos_csv(const char *nome_arquivo) {
     ListaProcessos lista_processos = { .quantidade = 0 };
     FILE *arquivo = fopen(nome_arquivo, "r");
@@ -147,13 +128,13 @@ int parse_linha_csv(char *linha, Processo *processo) {
 
     processo->tipo_io_atual = -1; /* Inicializa sem operação de E/S atual */ 
     processo->num_operacoes_io = 0;
+    processo->tempo_quantum_restante = 0;
 
     for (int i = 0; i < QUANTIDADE_TIPOS_IO; ++i) {
         processo->operacoes_io[i].tipo_io = i;
         processo->operacoes_io[i].presente = 0;
-        processo->operacoes_io[i].duracao_io = seleciona_tempo_io(i);
         processo->operacoes_io[i].tempo_inicio = -1;
-        processo->operacoes_io[i].tempo_restante = processo->operacoes_io[i].duracao_io;
+        processo->operacoes_io[i].tempo_restante = seleciona_tempo_io(i);
     }
 
     token = strtok(linha, ",");
@@ -166,14 +147,13 @@ int parse_linha_csv(char *linha, Processo *processo) {
                 processo->instante_chegada = converter_validar_int(token, 0, TEMPO_MAX_CHEGADA, &opcao_valida);
                 break;
             case 2:
+                /* Tempo de Serviço */ 
                 processo->tempo_cpu = converter_validar_int(token, TEMPO_MIN_CPU, TEMPO_MAX_CPU, &opcao_valida);
                 processo->tempo_cpu_restante = processo->tempo_cpu;
-                processo->tempo_quantum_restante = 0;
                 processo->tempo_cpu_atual = 0;
-                processo->status_processo = PRONTO;
                 break;
             case 3:
-                // Tempo de início da operação de Disco
+                /* Tempo de início da operação de Disco */ 
                 processo->operacoes_io[DISCO].tempo_inicio = converter_validar_int(token, TEMPO_IO_PADRAO, processo->tempo_cpu - 1, &opcao_valida);
                 if (processo->operacoes_io[DISCO].tempo_inicio >= 0) {
                     processo->num_operacoes_io++;
@@ -181,7 +161,7 @@ int parse_linha_csv(char *linha, Processo *processo) {
                 }
                 break;
             case 4:
-                // Tempo de início da operação de Fita
+                /* Tempo de início da operação de Fita */ 
                 processo->operacoes_io[FITA].tempo_inicio = converter_validar_int(token, TEMPO_IO_PADRAO, processo->tempo_cpu - 1, &opcao_valida);
                 if (processo->operacoes_io[FITA].tempo_inicio >= 0) {
                     processo->num_operacoes_io++;
@@ -189,17 +169,15 @@ int parse_linha_csv(char *linha, Processo *processo) {
                 }
                 break;
             default:
-                // Ignora tokens adicionais
+                /* Ignora tokens adicionais */ 
                 break;
         }
         idx++;
         token = strtok(NULL, ",");
     }
 
-    if (!opcao_valida) {
-        printf("%d", opcao_valida);
+    if (!opcao_valida)
         enviar_mensagem_erro("Leitura de variáveis inválida (CSV)");
-    }
 
     if (idx < 3) {
         return 0; // Dados insuficientes
@@ -247,7 +225,7 @@ int processo_finalizado(Processo *processo) {
 }
 
 int tempo_inicio_io(Processo *processo) {
-    if (processo->operacoes_io[processo->tipo_io_atual].presente == 1 && processo->num_operacoes_io != 0) {
+    if (processo->operacoes_io[processo->tipo_io_atual].presente == 1 && processo->num_operacoes_io != 0 && processo->tipo_io_atual > -1) {
         int tipo_io = processo->tipo_io_atual;
 
         int instante_inicio_io = processo->operacoes_io[tipo_io].tempo_inicio;

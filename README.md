@@ -9,20 +9,31 @@
 
 - Pedro Henrique Honorio Saito
 - Halison
+- Allan
 
 ## ⚙️ Pré-requisitos
 
 Antes de compilar o projeto, certifique-se de que os seguintes programas estão instalados:
 
-- **Compilador C** (por exemplo, `gcc`, `clang`)
-- Quaisquer **bibliotecas** ou dependências necessárias (liste-as, se aplicável)
+- **Compilador C** (por exemplo, `gcc`, `clang`).
+- Utilitário `make` para executar o Makefile.
 
 ## 🛠️ Instruções de Compilação
 
-Para compilar o projeto, certifique-se de ter instalado o compilador `gcc`. Com isso poderá executar o Makefile:
+Há duas opções para a compilação:
 
-```bash
-make
-```
+1. **Interface Padrão**  
+   Para usar a interface padrão, execute:  
+   ```bash
+   make clean
+   make
+   ```
 
-A compilação e a execução do programa são realizadas simultaneamente.
+2. **Interface Sofisticada**
+   Para usar a interface com caracteres Unicode, execute:  
+   ```bash
+   make clean
+   make pretty
+   ```
+
+O comando `make clean` remove binários antigos para uma nova compilação. Após compilar, o programa é executado automaticamente.

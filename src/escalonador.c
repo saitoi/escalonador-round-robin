@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-// Corrigir dependências malucas
 #include "../include/fila.h"
 #include "../include/processo.h"
 #include "../include/escalonador.h"
@@ -27,6 +26,7 @@ void processa_fila_prioridade(Fila *fila_prioridade, ListaFila *lista_filas, Lis
         else
             printf(" P%d sofreu preempcao, vai pra fila de baixa prioridade.\n", processo_atual->pid);
         enfileira(&lista_filas->filas[FILA_BAIXA_PRIORIDADE], processo_atual);
+        inicializa_quantum(&lista_filas->filas[FILA_BAIXA_PRIORIDADE]);
     } 
     else {
         enfileira_inicio(fila_prioridade, processo_atual);
@@ -58,7 +58,7 @@ void escalonador(ListaFila *lista_filas, ListaProcessos *lista_processos) {
     int instante_atual = 0;
     int processos_finalizados = 0;
 
-    imprime_informacao_processos(lista_processos);
+    imprime_tabela_processos(lista_processos);
     valida_entrada_char();
 
     while (processos_finalizados < lista_processos->quantidade) {
@@ -97,37 +97,6 @@ void verifica_novos_processos(Fila *fila_alta_prioridade, ListaProcessos *lista_
     }
 }
 
-void imprime_turnaround_processos(ListaProcessos lista_processos) {
-    float turnaround_medio = 0,
-          tempo_espera_medio = 0;
-
-    printf("\n═══════════════════════════════════════ TURNAROUND ══════════════════════════════════════\n");
-    printf(" PID\tTempo de Turnaround\tTempo de Espera\n");
-    printf("─────────────────────────────────────────────────────────────────────────────────────────\n");
-
-    for (int i = 0; i < lista_processos.quantidade; i++) {
-        printf(" P%d\t\t%d u.t.\t\t %d u.t.\n", 
-            lista_processos.processos[i].pid, 
-            lista_processos.processos[i].tempo_turnaround, 
-            lista_processos.processos[i].tempo_turnaround - lista_processos.processos[i].tempo_cpu);
-        turnaround_medio += (float) lista_processos.processos[i].tempo_turnaround;
-        tempo_espera_medio += (float) lista_processos.processos[i].tempo_turnaround - lista_processos.processos[i].tempo_cpu;
-    }
-
-    printf("═════════════════════════════════════════════════════════════════════════════════════════\n");
-    printf(" Turnaround médio: %.2f u.t.\n", turnaround_medio / lista_processos.quantidade);
-    printf(" Tempo de espera médio: %.2f u.t.\n", tempo_espera_medio / lista_processos.quantidade);
-}
-
-void imprime_tempos_turnaround(Processo *processos) {
-    float turnaround_medio = 0;
-    int i = 0;
-    for (i = 0; i < MAXIMO_PROCESSOS; i++) {
-        printf("P%d: %d u.t\n", processos[i].pid, processos[i].tempo_turnaround);
-        turnaround_medio += (float) processos[i].tempo_turnaround;
-    }
-    printf("\nTurnaround medio: %.2f u.t.\n", turnaround_medio / MAXIMO_PROCESSOS);
-}
 
 int todas_filas_vazias(ListaFila lista_filas) {
     int i;
@@ -139,7 +108,6 @@ int todas_filas_vazias(ListaFila lista_filas) {
 }
 
 void envia_para_io(Processo *processo, ListaFila *lista_filas) {
-    // printf("%d", processo->tipo_io_atual);
     printf(" P%d foi para a fila de E/S (%s).\n", processo->pid, seleciona_tipo_io(processo->tipo_io_atual));
 
     switch (processo->tipo_io_atual) {
