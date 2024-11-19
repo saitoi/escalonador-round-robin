@@ -1,9 +1,0 @@
-
-PREMISSAS A SEREM DEFINIDAS
----------------------------
-
-    - Limite de Processos Ativos: 
-    - Fatia de Tempo (Quantum): 
-    - Tempo de Serviços: 
-    - Interação com usuário: 
-    - 
